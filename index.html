@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f6e68">
+<title>La mia area atleta · prototipo</title>
+<style>
+:root{--bg:#edf3f2;--card:#fff;--tx:#18282a;--mu:#68797b;--ln:#dfe7e6;--ac:#0f6e68;--ac2:#e6f2f1;--g:#2e9e63;--y:#e2a400;--r:#d64545;--sh:0 1px 2px rgba(20,40,40,.06),0 8px 22px rgba(20,40,40,.07);color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1514;--card:#18221f;--tx:#e8f0ee;--mu:#9bb0ae;--ln:#2a3836;--ac:#4fc1b8;--ac2:#1d3330;--g:#5fcf8f;--y:#f0c24a;--r:#ff7b6b;--sh:0 1px 2px rgba(0,0,0,.4);color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif}
+.phone{max-width:460px;margin:0 auto;min-height:100vh;padding-bottom:88px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:calc(16px + env(safe-area-inset-top)) 20px 6px}
+.hi{font-size:22px;font-weight:700}.dt{font-size:13px;color:var(--mu);text-transform:capitalize}
+.icb{width:40px;height:40px;border-radius:50%;border:0;background:var(--card);box-shadow:var(--sh);font-size:18px;cursor:pointer;color:var(--tx)}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:16px;margin:12px 16px}
+.ct{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+.mu{color:var(--mu)}.sm{font-size:13px}.xs{font-size:12px}
+.banner{margin:10px 16px;padding:10px 14px;border-radius:12px;background:#fff4d6;color:#6b4e00;font-size:13px}
+.banner.bad{background:#fde3e0;color:#8a2a22}
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(460px,100%);display:flex;background:var(--card);border-top:1px solid var(--ln);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:5}
+.tabs button{flex:1;background:none;border:0;color:var(--mu);font:inherit;font-size:11px;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabs button span{font-size:20px;line-height:1}.tabs button.on{color:var(--ac);font-weight:700}
+.mood{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.mood button{border:2px solid var(--ln);background:var(--bg);border-radius:12px;padding:8px 0 4px;cursor:pointer;color:var(--tx);font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
+.mood button span{font-size:24px;line-height:1.1}.mood button b{font-size:12px}
+.mood button.on{border-color:var(--ac);background:var(--ac2)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--bg);border-radius:14px;padding:12px}.tile.full{grid-column:1/-1}
+.tl{font-size:12px;color:var(--mu);display:flex;align-items:center;justify-content:space-between}
+.tv{font-size:26px;font-weight:700;line-height:1.15;margin-top:2px}.tv small{font-size:13px;font-weight:500;color:var(--mu)}
+.td{font-size:12px;color:var(--mu);margin-top:2px}
+.dot{width:13px;height:13px;border-radius:50%;display:inline-block;background:var(--ln)}.dot.g{background:var(--g)}.dot.y{background:var(--y)}.dot.r{background:var(--r)}
+.leg{font-size:12px;color:var(--mu);margin-top:10px}.leg .dot{width:10px;height:10px;vertical-align:-1px;margin:0 3px 0 8px}
+.wx{display:flex;align-items:center;gap:14px}.wx .big{font-size:42px;line-height:1}
+.pill{display:inline-block;background:var(--ac2);color:var(--ac);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:600}
+.ev{padding:10px 0;border-bottom:1px solid var(--ln)}.ev:last-child{border-bottom:0;padding-bottom:0}.ev:first-child{padding-top:0}
+.ev .h{display:flex;gap:10px;align-items:flex-start}.ev .ic{font-size:24px;line-height:1.2}
+.ev summary{cursor:pointer;color:var(--ac);font-size:13px;margin-top:4px}
+.ev pre{white-space:pre-wrap;font:inherit;font-size:13px;margin:6px 0 0;color:var(--mu)}
+.day{font-size:13px;font-weight:700;color:var(--ac);margin:14px 18px 0;text-transform:capitalize}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{border:1px solid var(--ln);background:var(--bg);color:var(--tx);border-radius:99px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:6px 4px;text-align:right;border-bottom:1px solid var(--ln)}th:first-child,td:first-child{text-align:left}th{color:var(--mu);font-weight:600;font-size:12px}
+tr.cur td{background:var(--ac2);font-weight:700}tr.avg td{font-style:italic;color:var(--mu)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:90px;margin:4px 0 2px}.bars div{flex:1;text-align:center;font-size:11px;color:var(--mu)}.bars i{display:block;background:#bfd3d1;border-radius:5px 5px 0 0;margin:2px 14% 2px}.bars .c i{background:var(--ac)}
+.msg{background:var(--ac2);border-radius:14px;padding:12px 14px;font-size:14px}.msg b{font-weight:700}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:12px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer}.btn.sec{background:var(--bg);color:var(--tx);border:1px solid var(--ln)}
+.rpbox{overflow:hidden;border-radius:10px;box-shadow:var(--sh);margin-bottom:12px;background:#fff}.rpin{transform-origin:0 0;width:794px}
+.chat{display:flex;flex-direction:column;gap:8px;max-height:48vh;overflow:auto;padding:4px 2px 10px}
+.b{max-width:82%;padding:8px 12px;border-radius:16px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}.b.me{align-self:flex-end;background:var(--ac);color:#fff;border-bottom-right-radius:4px}.b.co{align-self:flex-start;background:var(--bg);border-bottom-left-radius:4px}
+.inp{display:flex;gap:8px}.inp input{flex:1;padding:11px 14px;border:1px solid var(--ln);border-radius:99px;background:var(--bg);color:var(--tx);font:inherit}
+.sheet{position:fixed;inset:0;background:rgba(10,20,20,.55);z-index:20;display:none;overflow:auto}.sheet.on{display:block}
+.sheet .in{max-width:460px;margin:0 auto;background:var(--card);min-height:100%;padding:20px}
+.sheet label{display:block;font-size:13px;color:var(--mu);margin:12px 0 3px}.sheet input,.sheet select{width:100%;padding:10px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.sheet .row{display:flex;gap:8px;align-items:center}.sheet .row input[type=checkbox]{width:auto}
+.center{text-align:center;padding:40px 24px}.center .big{font-size:48px}
+</style></head><body>
+<div class="phone">
+ <div class="top"><div><div class="hi" id="hi">Ciao</div><div class="dt" id="dt"></div></div><button class="icb" id="gear" aria-label="Impostazioni">⚙️</button></div>
+ <div id="banner"></div>
+ <main id="view"></main>
+</div>
+<nav class="tabs" id="tabs"></nav>
+<div class="sheet" id="sheet"><div class="in" id="sin"></div></div>
+<script>
+const P={short:7,long:60,tol:3,weeks:4,loadTol:20,sleepH:0.5,sleepQ:10}; // sleepH: calo ore sonno (h); sleepQ: calo qualità (%)
+const KG=['kg_lifted','icu_kg_lifted','icu_weight_lifted'],STR=['WeightTraining','Weight Training','Strength'];
+const SPORT={Run:['Run','TrailRun','VirtualRun'],Bike:['Ride','VirtualRide','MountainBikeRide','GravelRide','EBikeRide','EMountainBikeRide','Handcycle','Velomobile'],Swim:['Swim','OpenWaterSwim']};
+const sportOf=t=>Object.keys(SPORT).find(k=>SPORT[k].includes(t))||null;
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
+const mondayOf=s=>addDays(s,-((new Date(s+'T12:00:00').getDay()+6)%7));
+const fD=s=>s.slice(8,10)+'/'+s.slice(5,7),mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const num=(v,d=1)=>v==null?'–':v.toFixed(d),pct=v=>v==null?'–':`<span class="${v>0?'pos':v<0?'neg':''}">${v>0?'+':''}${v.toFixed(0)}%</span>`;
+
+async function api(id,path,key,q){
+ const u=new URL(`https://intervals.icu/api/v1/athlete/${id}/${path}`);Object.entries(q).forEach(([k,v])=>u.searchParams.set(k,v));
+ const r=await fetch(u,{headers:{Authorization:'Basic '+btoa('API_KEY:'+key)}});
+ if(!r.ok)throw new Error('HTTP '+r.status+(r.status==401||r.status==403?' (chiave o permessi non validi per questo atleta)':''));
+ return r.json();
+}
+const ratioOf=x=>x.hrv!=null&&x.restingHR>0?x.hrv*x.restingHR/600:null; // HRV:HR come intervals.icu
+function hrvSeries(w,oldest,newest,f=x=>x.hrv){
+ const m={};w.forEach(x=>{const v=f(x);if(v!=null)m[x.id]=v});const rows=[];
+ for(let d=oldest;d<=newest;d=addDays(d,1))rows.push({date:d,hrv:m[d]??null});
+ const roll=(i,n,min)=>{const v=rows.slice(Math.max(0,i-n+1),i+1).map(r=>r.hrv).filter(x=>x!=null);return v.length>=min?mean(v):null};
+ rows.forEach((r,i)=>{r.base=roll(i,P.short,Math.max(3,P.short>>1));r.long=roll(i,P.long,21);
+  r.diff=r.base!=null&&r.long!=null?r.base-r.long:null;r.pct=r.diff!=null?r.diff/r.long*100:null});
+ return rows;
+}
+function cv7(rows){const v=rows.slice(-7).map(r=>r.hrv).filter(x=>x!=null&&x>0).map(Math.log);if(v.length<4)return null;const m=mean(v);return Math.sqrt(v.reduce((s,x)=>s+(x-m)**2,0)/(v.length-1))/m*100}
+function dailyVals(w,oldest,newest,f){const m={};w.forEach(x=>{const v=f(x);if(v!=null)m[x.id]=v});const o=[];for(let d=oldest;d<=newest;d=addDays(d,1))o.push(m[d]??null);return o}
+function vs4w(v){const ok=a=>a.filter(x=>x!=null),all=ok(v),c=ok(v.slice(-7)),p=ok(v.slice(-35,-7)),cur=c.length>=3?mean(c):null,prev=p.length>=10?mean(p):null;
+ return{last:all.length?all[all.length-1]:null,cur,prev,d:cur!=null&&prev!=null?cur-prev:null}}
+function crossings(rows){let prev=0;const out=[];rows.forEach(r=>{if(r.diff==null||r.diff===0)return;const s=Math.sign(r.diff);if(prev&&s!==prev)out.push({date:r.date,dir:s>0?'up':'down',base:r.base});prev=s});return out}
+function hrvStatus(rows){
+ const d=rows.filter(r=>r.pct!=null);if(!d.length)return{state:'n/d'};
+ const l=d[d.length-1],cr=crossings(rows),c=cr[cr.length-1],dv=rows.filter(r=>r.hrv!=null);
+ return{state:l.pct<-P.tol?'down':l.pct>P.tol?'up':'stable',pct:l.pct,last:dv.length?dv[dv.length-1].hrv:null,
+  cross:c?(c.dir==='up'?'↑ ':'↓ ')+fD(c.date):'–',crossDir:c?c.dir:null,crossDate:c?c.date:null,since:c?Math.round((new Date(rows[rows.length-1].date)-new Date(c.date))/864e5):null};
+}
+function weekly(acts){
+ const g={},blank=w=>({week:w,ore:0,km:0,kg:0,carico:0,sedute:0});
+ acts.forEach(a=>{const d=(a.start_date_local||'').slice(0,10);if(!d)return;const w=mondayOf(d),o=g[w]||(g[w]=blank(w));
+  o.ore+=(a.moving_time||0)/3600;if(!STR.includes(a.type))o.km+=(a.distance||0)/1000;
+  const k=KG.find(f=>a[f]!=null);if(k)o.kg+=a[k];o.carico+=a.icu_training_load||0;o.sedute++});
+ const ws=Object.keys(g).sort();if(!ws.length)return[];
+ const out=[];for(let w=ws[0];w<=ws[ws.length-1];w=addDays(w,7))out.push(g[w]||blank(w));return out;
+}
+function loadStatus(ws){
+ const done=ws.filter(w=>w.week<mondayOf(iso(new Date())));if(done.length<2)return{state:'n/d'};
+ const last=done[done.length-1],prev=done.length>P.weeks?done.slice(-1-P.weeks,-1):done.slice(0,-1);
+ const r=k=>{const b=mean(prev.map(x=>x[k]));return b>0?(last[k]/b-1)*100:null},p=r('ore');
+ return{state:p==null?'n/d':p>P.loadTol?'high':p<-P.loadTol?'low':'normal',week:last.week,pct:p,ore:last.ore,km:r('km'),kg:r('kg'),carico:r('carico')};
+}
+const ADV={'down|high':['🔴 Riduci','HRV in calo e carico elevato: valuta una settimana di scarico o meno intensità.'],
+'down|normal':['🟠 Riduci/mantieni','HRV in calo con carico regolare: abbassa le intensità, tieni il volume.'],
+'down|low':['🟠 Indaga','HRV in calo anche con poco carico: controlla sonno, stress, malattia, altri fattori.'],
+'stable|high':['🟡 Mantieni','Carico alto ma HRV stabile: tollerato, non spingere oltre e monitora.'],
+'stable|normal':['🟢 Mantieni/progredisci','Situazione equilibrata: progressione graduale possibile.'],
+'stable|low':['🟢 Puoi aumentare','HRV stabile e carico basso: c\'è margine per aumentare.'],
+'up|high':['🟢 Mantieni','HRV in crescita nonostante il carico alto: buon adattamento.'],
+'up|normal':['🟢 Puoi aumentare','HRV in crescita con carico regolare: aumenta volume o intensità.'],
+'up|low':['🟢 Aumenta','HRV alta e carico basso: ben recuperato, spazio per stimoli maggiori.']};
+const advice=(h,l)=>ADV[h+'|'+l]||['⚪ Dati insufficienti','Servono più dati HRV e/o attività.'];
+function sleepFlags(sl,sq){return{dur:!!(sl&&sl.d!=null&&sl.d<=-P.sleepH),qual:!!(sq&&sq.d!=null&&sq.prev>0&&sq.d/sq.prev*100<=-P.sleepQ)}}
+function sleepIssues(sl,sq){const o=[],f=sleepFlags(sl,sq);
+ if(f.dur)o.push(`sonno medio ${sl.cur.toFixed(1)} h, ${Math.abs(sl.d).toFixed(1)} h in meno rispetto alla media delle 4 settimane precedenti`);
+ if(f.qual)o.push(`qualità del sonno ${(sq.d/sq.prev*100).toFixed(0)}% rispetto alla media delle 4 settimane precedenti`);
+ return o}
+function alerts(n,h,l,r){const o=[];
+ if(r&&r.since!=null&&r.since<=3)o.push(`${n}: la baseline HRV:FC ha attraversato la long term ${r.crossDir==='up'?"verso l'alto":'verso il basso'} (${r.cross}).`);
+ if(h.since!=null&&h.since<=3)o.push(`${n}: la baseline HRV ha attraversato la long term ${h.crossDir==='up'?"verso l'alto":'verso il basso'} (${h.cross}).`);
+ if(l.state==='high'||l.state==='low')o.push(`${n}: ore settimanali ${l.pct>0?'+':''}${l.pct.toFixed(0)}% rispetto alla media delle ultime ${P.weeks} settimane.`);return o}
+
+function hrvChart(rows){
+ const W=900,H=300,m={l:42,r:10,t:10,b:24},vals=rows.flatMap(r=>[r.hrv,r.base,r.long]).filter(v=>v!=null);
+ if(!vals.length)return'<p class="mu">Nessun dato HRV nel periodo.</p>';
+ const pad=(Math.max(...vals)-Math.min(...vals))*.08||1,lo=Math.min(...vals)-pad,hi=Math.max(...vals)+pad,n=rows.length,x=i=>m.l+i*(W-m.l-m.r)/(n-1),y=v=>m.t+(hi-v)*(H-m.t-m.b)/(hi-lo);
+ const line=(k,c)=>{let d='',pen=false;rows.forEach((r,i)=>{if(r[k]==null){pen=false;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(r[k]).toFixed(1);pen=true});return`<path d="${d}" fill="none" stroke="${c}" stroke-width="2"/>`};
+ let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafico HRV">`;
+ for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--ln)"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mu)">${v.toFixed(hi-lo<6?2:0)}</text>`}
+ for(let i=0;i<n;i+=30)s+=`<text x="${x(i)}" y="${H-6}" font-size="11" fill="var(--mu)">${fD(rows[i].date)}</text>`;
+ rows.forEach((r,i)=>{if(r.hrv!=null)s+=`<circle cx="${x(i)}" cy="${y(r.hrv)}" r="2.5" fill="var(--mu)" opacity=".55"/>`});
+ s+=line('base','var(--ac)')+line('long','var(--org)');
+ crossings(rows).forEach(c=>{const i=rows.findIndex(r=>r.date===c.date),u=c.dir==='up',col=u?'var(--grn)':'var(--red)',cx=x(i),cy=y(c.base);
+  s+=`<path d="M${cx} ${u?cy-9:cy+9} l-6 ${u?12:-12} h12z" fill="${col}"><title>Incrocio ${u?'verso l\'alto':'verso il basso'} ${fD(c.date)}</title></path>`});
+ return s+'</svg><div class="leg"><span><i style="background:var(--mu)"></i>HRV daily</span><span><i style="background:var(--ac)"></i>Baseline ('+P.short+' gg)</span><span><i style="background:var(--org)"></i>Long term ('+P.long+' gg)</span><span class="pos">▲ incrocio verso l\'alto</span> <span class="neg">▼ verso il basso</span></div>';
+}
+function barChart(ws,k){
+ const W=900,H=200,m={l:42,r:10,t:10,b:24},mx=Math.max(...ws.map(w=>w[k]),1)*1.1,bw=(W-m.l-m.r)/ws.length;
+ let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Carico settimanale">`;
+ ws.forEach((w,i)=>{const h=w[k]/mx*(H-m.t-m.b);s+=`<rect x="${m.l+i*bw+2}" y="${H-m.b-h}" width="${Math.max(bw-4,1)}" height="${h}" fill="var(--ac)"><title>${fD(w.week)}: ${w[k].toFixed(1)}</title></rect>`;
+  const pv=ws.slice(Math.max(0,i-P.weeks),i).map(z=>z[k]);if(i%Math.ceil(ws.length/10)===0)s+=`<text x="${m.l+i*bw}" y="${H-6}" font-size="11" fill="var(--mu)">${fD(w.week)}</text>`});
+ s+=`<text x="${m.l-6}" y="${m.t+8}" text-anchor="end" font-size="11" fill="var(--mu)">${mx.toFixed(0)}</text><text x="${m.l-6}" y="${H-m.b}" text-anchor="end" font-size="11" fill="var(--mu)">0</text>`;
+ return s+'</svg>';
+}
+
+const MOTTO='Migliori di ieri, peggiori di domani';
+const QUOTES=[
+['Non è perché le cose sono difficili che non osiamo; è perché non osiamo che sono difficili.','Seneca'],
+['Non è facile la via che dalla terra conduce alle stelle.','Seneca'],
+['La fortuna aiuta gli audaci.','Virgilio'],
+['Il lavoro ostinato vinse ogni cosa.','Virgilio'],
+['La prima e più grande vittoria è vincere se stessi.','Platone'],
+['Il principio è la parte più importante di ogni opera.','Platone'],
+['Una vita senza ricerca non è degna di essere vissuta.','Socrate'],
+['Chi vuole muovere il mondo prima muova se stesso.','Socrate'],
+['La goccia scava la pietra.','Ovidio'],
+['Ciò che sta sulla via diventa la via.','Marco Aurelio'],
+['Non sono le cose a turbare gli uomini, ma le opinioni che essi hanno delle cose.','Epitteto'],
+['Chi ha un perché per vivere può sopportare quasi ogni come.','Friedrich Nietzsche'],
+['Cogli l\'attimo, confidando il meno possibile nel domani.','Orazio']];
+const quoteLine=q=>`«${q[0]}» — ${q[1]}`;
+const EVENTS=[
+ {id:'hrvfc_down',label:'HRV:FC in discesa (baseline sotto la long term)',def:1,adv:'rec',neg:1,why:"il tuo indice di recupero (HRV:FC) è in discesa rispetto alla tua media di lungo periodo",test:r=>!!r.hR&&r.hR.state==='down'},
+ {id:'hrvfc_cross_down',sup:'hrvfc_down',label:'Incrocio HRV:FC verso il basso (ultimi 3 giorni)',def:1,adv:'rec',neg:1,why:"la media recente del tuo recupero (HRV:FC) è scesa sotto quella di lungo periodo",test:r=>!!r.hR&&r.hR.since!=null&&r.hR.since<=3&&r.hR.crossDir==='down'},
+ {id:'hrv_down',label:'HRV in discesa (baseline sotto la long term)',def:0,adv:'rec',neg:1,why:"la tua HRV è in discesa rispetto alla tua media di lungo periodo",test:r=>!!r.h&&r.h.state==='down'},
+ {id:'hrv_cross_down',sup:'hrv_down',label:'Incrocio HRV verso il basso (ultimi 3 giorni)',def:0,adv:'rec',neg:1,why:"la media recente della tua HRV è scesa sotto quella di lungo periodo",test:r=>!!r.h&&r.h.since!=null&&r.h.since<=3&&r.h.crossDir==='down'},
+ {id:'sleep_dur',label:'Ore di sonno sotto la media',def:1,adv:'sleepdur',neg:1,why:"stai dormendo meno del solito: le tue ore di sonno sono sotto la tua media",test:r=>sleepFlags(r.sl,r.sq).dur},
+ {id:'sleep_qual',label:'Qualità del sonno sotto la media',def:1,adv:'sleepq',neg:1,why:"la qualità del tuo sonno è sotto la tua media",test:r=>sleepFlags(r.sl,r.sq).qual},
+ {id:'idle4',label:'Nessun allenamento da 4 giorni consecutivi',def:1,adv:'idle',neg:1,why:"non risultano allenamenti registrati da almeno 4 giorni consecutivi",test:r=>r.idle!=null&&r.idle>=4},
+ {id:'load_high',label:'Carico settimanale alto',def:1,load:'high',why:"nell'ultima settimana il carico di allenamento è stato più alto del solito",test:r=>!!r.l&&r.l.state==='high'},
+ {id:'load_low',label:'Carico settimanale basso',def:0,load:'low',why:"nell'ultima settimana il carico di allenamento è stato più leggero del solito",test:r=>!!r.l&&r.l.state==='low'},
+ {id:'hrvfc_up',label:'HRV:FC in crescita (segnale positivo)',def:0,adv:'keep',why:"il tuo indice di recupero (HRV:FC) è in crescita: ottimo segnale",test:r=>!!r.hR&&r.hR.state==='up'},
+ {id:'hrvfc_cross_up',sup:'hrvfc_up',label:'Incrocio HRV:FC verso l\'alto (segnale positivo)',def:0,adv:'keep',why:"la media recente del tuo recupero (HRV:FC) è tornata sopra quella di lungo periodo: ottimo segnale",test:r=>!!r.hR&&r.hR.since!=null&&r.hR.since<=3&&r.hR.crossDir==='up'}];
+const ATXT={
+rec:"Per il recupero: dormi qualche ora in più, vai a letto e svegliati a orari regolari, bevi con regolarità, limita alcol e cene pesanti e concediti momenti di relax.",
+sleepdur:"Per dormire di più: vai a letto prima e spegni gli schermi almeno un'ora prima di dormire.",
+sleepq:"Per dormire meglio: tieni la camera buia, fresca e silenziosa, evita la caffeina nel pomeriggio e i pasti pesanti la sera.",
+idle:"Se sei fermo per un motivo (malattia, infortunio, impegni) scrivimelo, così adatto le schede. Se stai bene, riprendi con regolarità: anche una seduta leggera aiuta.",
+keep:"Continua con le tue buone abitudini: sonno regolare, alimentazione curata e buona idratazione."};
+const evSel=()=>{let on=null,known=[];try{const a=JSON.parse(localStorage.getItem('cd_ev')||'null');
+  if(Array.isArray(a)){on=a;known=EVENTS.map(e=>e.id).filter(id=>id!=='idle4')}else if(a&&Array.isArray(a.on)){on=a.on;known=a.known||[]}}catch(e){}
+ if(!on)return new Set(EVENTS.filter(e=>e.def).map(e=>e.id));
+ const st=new Set(on);EVENTS.forEach(e=>{if(e.def&&!known.includes(e.id))st.add(e.id)});return st};
+const evSave=st=>{try{localStorage.setItem('cd_ev',JSON.stringify({on:[...st],known:EVENTS.map(e=>e.id)}))}catch(e){}};
+const activeEvents=r=>{if(!r||r.error)return[];const on=evSel();return EVENTS.filter(e=>on.has(e.id)&&e.test(r))};
+const CT={get(){try{return JSON.parse(localStorage.getItem('cd_contact')||'{}')}catch(e){return{}}},mark(n){const o=this.get();o[n]=iso(new Date());try{localStorage.setItem('cd_contact',JSON.stringify(o))}catch(e){}},unmark(n){const o=this.get();delete o[n];try{localStorage.setItem('cd_contact',JSON.stringify(o))}catch(e){}}};
+const SEEN={get(){try{return JSON.parse(localStorage.getItem('cd_seen')||'{}')}catch(e){return{}}},
+ touch(){const o=this.get(),t=iso(new Date());let sent=new Set(),ch=0;try{sent=new Set(JSON.parse(localStorage.getItem('cd_sent')||'[]'))}catch(e){}
+  R.forEach(r=>{if(r.error)return;notifyItems(r).forEach(x=>{if(!(x.key in o)){o[x.key]=sent.has(x.key)?'2000-01-01':t;ch=1}})});
+  if(ch)try{localStorage.setItem('cd_seen',JSON.stringify(o))}catch(e){}return o}};
+function msgText(r,qi=0){
+ const all=activeEvents(r);if(!all.length)return'';
+ const ev=all.filter(e=>!(e.sup&&all.some(x=>x.id===e.sup)));  // l'incrocio non si ripete se c'è già lo stato
+ const has=f=>ev.some(f),negRec=has(e=>e.adv==='rec'),sleepEv=has(e=>e.adv==='sleepdur'||e.adv==='sleepq'),lH=has(e=>e.load==='high'),lL=has(e=>e.load==='low'),idleEv=has(e=>e.adv==='idle');
+ let keys=[...new Set(ev.map(e=>e.adv).filter(Boolean))];if(has(e=>e.neg))keys=keys.filter(k=>k!=='keep');
+ let t;
+ if(negRec&&lL)t="Il carico è stato leggero ma il recupero è sotto la media: valuterò io come impostare le prossime schede. Se hai stress, malattia o altri problemi, scrivimelo.";
+ else if(negRec&&lH)t="Il carico è stato alto e il recupero è sotto la media: ne terrò conto io nelle prossime schede, alleggerendo dove serve.";
+ else if(negRec)t="Terrò conto del tuo recupero nelle prossime schede, adattando carichi e intensità.";
+ else if(lH)t="Il carico è stato alto: ne terrò conto io nelle prossime schede.";
+ else if(lL)t="Il carico è stato più leggero del solito: valuterò io nelle prossime schede come proseguire.";
+ else if(idleEv)t="Quando riprendi ci penserò io a ricalibrare le prossime schede.";
+ else if(sleepEv)t="Il sonno incide sul recupero: ne terrò conto io nelle prossime schede.";
+ else t="Valuterò io, nelle prossime schede, se spingere un po' di più.";
+ const sec=['*Perché ti scrivo*\nDai tuoi dati recenti risulta che:\n'+ev.map(e=>'• '+e.why).join('\n')];
+ if(keys.length)sec.push('*I miei consigli*\n'+keys.map(k=>'• '+ATXT[k]).join('\n'));
+ sec.push('*Allenamento*\n'+t+' Aggiustare gli allenamenti è compito mio.');
+ return `Ciao ${r.name.split(' ')[0]},\n\n${sec.join('\n\n')}\n\n${quoteLine(QUOTES[qi%QUOTES.length])}\n\n*_${MOTTO}_*`}
+
+const RC={get(k,d=''){try{const v=localStorage.getItem('cd_rp_'+k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem('cd_rp_'+k,v)}catch(e){}}};
+const itn=(v,d=1)=>v==null||isNaN(v)?'–':v.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fdl=s=>s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4);
+const wMap=(w,f)=>{const m={};w.forEach(x=>{const v=f(x);if(v!=null)m[x.id]=v});return m};
+const wAvg=(m,a,b,min)=>{const v=[];for(let d=a;d<=b;d=addDays(d,1))if(m[d]!=null)v.push(m[d]);return v.length>=min?mean(v):null};
+function sumAct(acts,a,b){const o={ore:0,km:0,kg:0,carico:0,sedute:0,srpe:0,nrpe:0,oreRun:0,kmRun:0,oreBike:0,kmBike:0,oreSwim:0,kmSwim:0};
+ acts.forEach(x=>{const d=(x.start_date_local||'').slice(0,10);if(!d||d<a||d>b)return;o.ore+=(x.moving_time||0)/3600;if(!STR.includes(x.type))o.km+=(x.distance||0)/1000;
+  const sp=sportOf(x.type);if(sp){o['ore'+sp]+=(x.moving_time||0)/3600;o['km'+sp]+=(x.distance||0)/1000}
+  const k=KG.find(f=>x[f]!=null);if(k)o.kg+=x[k];o.carico+=x.icu_training_load||0;o.sedute++;
+  const sr=x.session_rpe>0?x.session_rpe:(x.icu_rpe>0&&x.moving_time>0?x.icu_rpe*x.moving_time/60:0);if(sr>0){o.srpe+=sr;o.nrpe++}});return o}
+function idleDays(acts,today=new Date()){const ds=acts.map(x=>(x.start_date_local||'').slice(0,10)).filter(Boolean).sort();if(!ds.length)return null;
+ const n=Math.round((new Date(iso(today)+'T12:00:00')-new Date(ds[ds.length-1]+'T12:00:00'))/864e5);return Math.max(0,n-1)} // giorni interi senza allenamento prima di oggi
+function parseAthletes(text){const aths=[],bad=[];
+ for(const l of text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){
+  const p=l.split(',').map(x=>x.trim());
+  // riga spezzata con Invio: un'email o un telefono rimasti da soli si agganciano all'atleta precedente
+  if(p.length===1&&aths.length&&(l.includes('@')||/^[+\d\s().-]{6,}$/.test(l))){const a=aths[aths.length-1];if(l.includes('@'))a.email=l;else a.phone=l;continue}
+  if(!p[0]||/[@\s]/.test(p[0])){bad.push(l);continue}   // l'id di intervals.icu non ha spazi né @
+  const ex=p.slice(2).filter(Boolean);
+  aths.push({id:p[0],name:p[1]||p[0],phone:ex.find(x=>!x.includes('@'))||'',email:ex.find(x=>x.includes('@'))||''})}
+ return{aths,bad}}
+function repWeek(today=new Date()){const mon=mondayOf(iso(today));return[addDays(mon,-7),addDays(mon,-1)]}
+function repData(r,today=new Date()){
+ const [a0,b0]=repWeek(today),ba=addDays(a0,-28),bb=addDays(a0,-1);
+ const q=r.w.some(y=>y.sleepScore!=null)?x=>x.sleepScore??null:x=>x.sleepQuality??null;
+ const defs=[['HRV','ms',x=>x.hrv,1,0],['HRV:FC','',ratioOf,1,2],['FC a riposo','bpm',x=>x.restingHR>0?x.restingHR:null,-1,0],['Sonno','h',x=>x.sleepSecs>0?x.sleepSecs/3600:null,1,1],['Qualità del sonno','',q,1,0]];
+ const rec=defs.map(([label,unit,f,good,dec])=>{const m=wMap(r.w,f),cur=wAvg(m,a0,b0,3),prev=wAvg(m,ba,bb,10),d=cur!=null&&prev!=null?cur-prev:null;
+  return{label,unit,good,dec,cur,prev,d,pct:d!=null&&prev?d/prev*100:null}});
+ const dates=r.ac.map(x=>(x.start_date_local||'').slice(0,10)).filter(Boolean).sort(),first=dates[0]?mondayOf(dates[0]):null;
+ const cur=sumAct(r.ac,a0,b0),weeks=[];
+ for(let k=4;k>=1;k--){const a=addDays(a0,-7*k);weeks.push({a,...sumAct(r.ac,a,addDays(a,6)),ok:first!=null&&a>=first})}
+ const used=weeks.filter(w=>w.ok);
+ const base=used.length?Object.fromEntries(['ore','km','kg','carico','sedute','srpe','oreRun','kmRun','oreBike','kmBike','oreSwim','kmSwim'].map(k=>[k,mean(used.map(w=>w[k]))])):null;
+ return{a0,b0,rec,cur,base,weeks,from:ba}}
+function repPage1(r){
+ const d=repData(r),col=RC.get('color','#0f6e68'),logo=RC.get('logo',''),coach=RC.get('coach',''),nome=esc(r.name.split(' ')[0]);
+ const row=(l,c,p,x)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #e3e9e8;font-size:14px"><div style="flex:0 0 34%;font-weight:600">${l}</div><div style="flex:0 0 19%">${c}</div><div style="flex:0 0 19%;color:#5c6b6b">${p}</div><div style="flex:1">${x}</div></div>`;
+ const sec=t=>`<div style="font-size:17px;font-weight:700;color:${col};margin:20px 0 2px">${t}</div><div style="display:flex;font-size:12px;color:#7a8888;padding:4px 0;border-bottom:2px solid ${col}"><div style="flex:0 0 34%"></div><div style="flex:0 0 19%">Questa settimana</div><div style="flex:0 0 19%">Media 4 sett.</div><div style="flex:1">Differenza</div></div>`;
+ const chip=m=>{if(m.d==null)return'<span style="color:#7a8888">dati insufficienti</span>';
+  const same=Math.abs(m.pct||0)<2,up=m.d>0,better=up===(m.good>0),c=same?'#6b7a7a':better?'#2e8b57':'#d9822b';
+  return`<span style="color:${c};font-weight:600">${same?'≈':up?'▲':'▼'} ${up?'+':''}${itn(m.d,m.dec)}${m.unit?' '+m.unit:''} (${m.pct>0?'+':''}${itn(m.pct,0)}%)</span>`};
+ const val=(v,dec,u)=>v==null?'–':itn(v,dec)+(u?' '+u:'');
+ let rec='';d.rec.forEach(m=>{rec+=row(m.label,val(m.cur,m.dec,m.unit),val(m.prev,m.dec,m.unit),chip(m))});
+ const tchip=(c,b,dec,u)=>{if(b==null)return'<span style="color:#7a8888">–</span>';const x=c-b,p=b>0?x/b*100:null,sg=x>0?'+':'';
+  return`<span style="color:#44585a;font-weight:600">${Math.abs(x)<1e-9?'≈':x>0?'▲':'▼'} ${sg}${itn(x,dec)}${u?' '+u:''}${p!=null?` (${sg}${itn(p,0)}%)`:''}</span>`};
+ const T=[['Ore di attività','ore',1,'h'],['Distanza','km',1,'km'],['Kg sollevati','kg',0,'kg'],['Carico (TSS)','carico',0,''],['sRPE (RPE × minuti)','srpe',0,'UA'],['Sedute','sedute',0,'']];
+ let tr='';T.forEach(([l,k,dec,u])=>{if((k==='km'||k==='kg'||k==='srpe')&&!d.cur[k]&&!(d.base&&d.base[k]))return;
+  tr+=row(l,val(d.cur[k],k==='sedute'?0:dec,u),d.base?val(d.base[k],k==='sedute'?1:dec,u):'–',tchip(d.cur[k],d.base?d.base[k]:null,k==='sedute'?1:dec,u))});
+ const bars=[...d.weeks.map(w=>({l:fdl(w.a).slice(0,5),v:w.ore,cur:false,ok:w.ok})),{l:fdl(d.a0).slice(0,5),v:d.cur.ore,cur:true,ok:true}],mx=Math.max(...bars.map(b=>b.v),1);
+ const chart=bars.map(b=>`<div style="flex:1;text-align:center"><div style="font-size:12px;color:#5c6b6b;height:16px">${b.ok?itn(b.v,1):''}</div><div style="height:${Math.round(b.v/mx*44)}px;min-height:${b.ok?2:0}px;background:${b.cur?col:'#c7d3d2'};margin:0 16%;border-radius:3px 3px 0 0"></div><div style="font-size:12px;color:#5c6b6b;margin-top:4px">${b.l}</div></div>`).join('');
+ let intro='Ecco il riepilogo della tua settimana.';
+ if(d.base&&d.base.ore>0){const p=(d.cur.ore/d.base.ore-1)*100;intro=`Questa settimana ti sei allenato per ${itn(d.cur.ore,1)} ore in ${d.cur.sedute} ${d.cur.sedute===1?'seduta':'sedute'}: ${Math.abs(p)<10?'in linea con':p>0?'sopra':'sotto'} la tua media delle ultime 4 settimane.`}
+ else if(d.cur.sedute===0)intro='Questa settimana non risultano allenamenti registrati.';
+ const note=r.note&&r.note.trim()?`<div style="margin-top:18px;padding:10px 14px;border-left:4px solid ${col};background:#f3f7f6;font-size:14px;white-space:pre-line;overflow-wrap:anywhere">${esc(r.note.trim().slice(0,280))}</div>`:'';
+ const brand=logo?`<img src="${logo}" style="max-height:64px;max-width:230px;display:block" alt="">`:`<div style="font-size:22px;font-weight:700;color:${col}">${esc(coach||'Il tuo coach')}</div>`;
+ return`<div class="rp" style="width:794px;height:1120px;position:relative;overflow:hidden;background:#fff;color:#1d2b2a;font-family:'Segoe UI',Arial,sans-serif;line-height:1.45;box-sizing:border-box"><div style="height:12px;background:${col}"></div><div style="padding:26px 42px 0">
+ <div style="display:flex;justify-content:space-between;align-items:center;min-height:68px">${brand}<div style="text-align:right"><div style="font-size:20px;font-weight:700">Report settimanale</div><div style="font-size:13px;color:#5c6b6b">dal ${fdl(d.a0)} al ${fdl(d.b0)}</div></div></div>
+ <div style="font-size:24px;font-weight:700;margin-top:26px">Ciao ${nome},</div><div style="font-size:15px;margin-top:4px">${intro}</div>
+ ${sec('Recupero')}${rec}${sec('Allenamento')}${tr}${d.cur.srpe&&d.cur.nrpe<d.cur.sedute?`<div style="font-size:11px;color:#7a8888;margin-top:4px">sRPE calcolato sulle ${d.cur.nrpe} sedute (su ${d.cur.sedute}) con RPE registrato.</div>`:''}
+ <div style="font-size:13px;color:#5c6b6b;margin:14px 0 4px">Ore di attività: le ultime 4 settimane e quella appena conclusa</div>
+ <div style="display:flex;align-items:flex-end;height:96px;border-bottom:1px solid #c7d3d2">${chart}</div>${note}</div>
+ <div style="position:absolute;left:42px;right:42px;bottom:26px;border-top:1px solid #e3e9e8;padding-top:10px;font-size:12px;color:#5c6b6b"><div style="display:flex;justify-content:space-between;align-items:flex-end"><div>${coach?`<div style="font-weight:600;color:#1d2b2a">${esc(coach)}</div>`:''}<div style="font-size:11px;max-width:430px">Valori medi della settimana (lunedì–domenica) confrontati con la media delle 4 settimane precedenti. Un "–" indica che il dato non è stato registrato. I dati sono indicativi e non sostituiscono un parere medico.</div></div><div style="font-size:14px;color:${col}"><b><i>${MOTTO}</i></b></div></div></div></div>`}
+const repHTML=r=>repPage1(r)+repPage2(r);
+function repPage2(r){
+ const d=repData(r),col=RC.get('color','#0f6e68'),logo=RC.get('logo',''),coach=RC.get('coach','');
+ const days=[];for(let i=0;i<35;i++)days.push(addDays(d.from,i));
+ const W=710,H=190,ml=42,mr=42,mt=12,mb=22,pw=W-ml-mr,stp=pw/35,x=i=>ml+(i+.5)*stp,ph=H-mt-mb;
+ const svg=b=>`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Segoe UI, Arial, sans-serif">${b}</svg>`;
+ const base=(lo,hi,dec,lab2)=>{const y=v=>mt+(hi-v)*ph/(hi-lo);let b=`<rect x="${ml+28*stp}" y="${mt}" width="${7*stp}" height="${ph}" fill="${col}" fill-opacity=".08"/>`;
+  for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;b+=`<line x1="${ml}" x2="${W-mr}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e9e8"/><text x="${ml-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="#7a8888">${itn(v,dec)}</text>`;if(lab2)b+=`<text x="${W-mr+6}" y="${y(v)+4}" font-size="11" fill="#d9822b">${lab2(k)}</text>`}
+  for(let i=0;i<35;i+=7)b+=`<line x1="${ml+i*stp}" x2="${ml+i*stp}" y1="${mt}" y2="${H-mb}" stroke="#e3e9e8"/><text x="${ml+i*stp+3}" y="${H-7}" font-size="11" fill="#7a8888">${fD(days[i])}</text>`;
+  return{b,y}};
+ const nodata='<div style="height:60px;font-size:13px;color:#7a8888;padding-top:20px">Dati insufficienti per il grafico.</div>';
+ // HRV:FC
+ const mR={};(r.rowsR||[]).forEach(z=>{mR[z.date]=z});const pts=days.map(dt=>mR[dt]||{}),vals=pts.flatMap(q=>[q.hrv,q.base,q.long]).filter(v=>v!=null);
+ let c1=nodata;
+ if(vals.length>=3){let lo=Math.min(...vals),hi=Math.max(...vals);const pad=(hi-lo)*.12||.5;lo-=pad;hi+=pad;const g=base(lo,hi,hi-lo<6?2:hi-lo<30?1:0);
+  const line=(k,o)=>{let t='',pen=0;pts.forEach((q,i)=>{if(q[k]==null){pen=0;return}t+=(pen?'L':'M')+x(i).toFixed(1)+' '+g.y(q[k]).toFixed(1);pen=1});return t?`<path d="${t}" fill="none" ${o}/>`:''};
+  let b=g.b;pts.forEach((q,i)=>{if(q.hrv!=null)b+=`<circle cx="${x(i).toFixed(1)}" cy="${g.y(q.hrv).toFixed(1)}" r="2.6" fill="#8fa3a2"/>`});
+  b+=line('long','stroke="#d9822b" stroke-width="2" stroke-dasharray="6 4"')+line('base',`stroke="${col}" stroke-width="2.6"`);
+  c1=svg(b)+`<div style="font-size:11px;color:#5c6b6b"><span style="color:#8fa3a2">●</span> valore giornaliero &nbsp; <span style="color:${col};font-weight:700">━</span> media ${P.short} giorni &nbsp; <span style="color:#d9822b;font-weight:700">╌╌</span> media di lungo periodo (${P.long} giorni)</div>`}
+ // Sonno
+ const qf=r.w.some(y=>y.sleepScore!=null)?z=>z.sleepScore??null:z=>z.sleepQuality??null;
+ const mh=wMap(r.w,z=>z.sleepSecs>0?z.sleepSecs/3600:null),mq=wMap(r.w,qf),hv=days.map(dt=>mh[dt]??null),qv=days.map(dt=>mq[dt]??null),hh=hv.filter(v=>v!=null),qq=qv.filter(v=>v!=null);
+ let c2=nodata;
+ if(hh.length>=3){const hmax=Math.max(8,Math.ceil(Math.max(...hh)/4)*4),mxq=qq.length?Math.max(...qq):0,qmax=mxq<=4?4:mxq<=8?8:100,g=base(0,hmax,0,k=>itn(qmax*k/4,0));
+  const yq=v=>mt+(qmax-v)*ph/qmax;let b=g.b;
+  hv.forEach((v,i)=>{if(v!=null){const y=g.y(v);b+=`<rect x="${(x(i)-stp*.32).toFixed(1)}" y="${y.toFixed(1)}" width="${(stp*.64).toFixed(1)}" height="${(mt+ph-y).toFixed(1)}" fill="${i>=28?col:'#b9cac8'}" rx="1.5"/>`}});
+  let t='',pen=0;qv.forEach((v,i)=>{if(v==null){pen=0;return}t+=(pen?'L':'M')+x(i).toFixed(1)+' '+yq(v).toFixed(1);pen=1});
+  if(t)b+=`<path d="${t}" fill="none" stroke="#d9822b" stroke-width="2.2"/>`;qv.forEach((v,i)=>{if(v!=null)b+=`<circle cx="${x(i).toFixed(1)}" cy="${yq(v).toFixed(1)}" r="2.6" fill="#d9822b"/>`});
+  c2=svg(b)+`<div style="font-size:11px;color:#5c6b6b"><span style="color:${col}">■</span> ore di sonno (scala a sinistra) &nbsp; <span style="color:#d9822b;font-weight:700">●━</span> qualità del sonno (scala a destra)</div>`}
+ // Tabella allenamento
+ const C=[['Ore','ore',1],['Km','km',1],['Ore corsa','oreRun',1],['Km corsa','kmRun',1],['Ore bici','oreBike',1],['Km bici','kmBike',1],['Ore nuoto','oreSwim',1],['Km nuoto','kmSwim',2],['Kg sollevati','kg',0]];
+ const okw=d.weeks.filter(w=>w.ok),cols=C.filter(([,k])=>k==='ore'||k==='km'||[...okw,d.cur].some(w=>w[k]>0)),lw=118;
+ const cw=`${((100-0)/ (cols.length+2.2)).toFixed(2)}%`;
+ const cell=(v,k,dec,ok=true)=>!ok||v==null?'–':(k==='ore'||k==='km'||v>0)?itn(v,dec):'–';
+ const td=(t,extra='')=>`<td style="padding:5px 4px;text-align:right;border-bottom:1px solid #e3e9e8;font-size:12px;${extra}">${t}</td>`;
+ const lab=(t,extra='')=>`<td style="padding:5px 4px;text-align:left;border-bottom:1px solid #e3e9e8;font-size:12px;white-space:nowrap;${extra}">${t}</td>`;
+ let tb=`<tr><td style="padding:4px;text-align:left;font-size:11px;color:#7a8888;border-bottom:2px solid ${col}">Settimana</td>${cols.map(([l])=>`<td style="padding:4px 2px;text-align:right;font-size:10.5px;white-space:nowrap;color:#7a8888;border-bottom:2px solid ${col}">${l}</td>`).join('')}</tr>`;
+ d.weeks.forEach(w=>{tb+=`<tr>${lab(fD(w.a)+' – '+fD(addDays(w.a,6)))}${cols.map(([,k,dec])=>td(cell(w[k],k,dec,w.ok))).join('')}</tr>`});
+ tb+=`<tr style="background:#eef5f4">${lab(fD(d.a0)+' – '+fD(d.b0)+' <b style="color:'+col+'">ultima</b>','font-weight:700')}${cols.map(([,k,dec])=>td(cell(d.cur[k],k,dec),'font-weight:700')).join('')}</tr>`;
+ tb+=`<tr>${lab('Media 4 sett. precedenti','font-style:italic;color:#5c6b6b')}${cols.map(([,k,dec])=>td(d.base?cell(d.base[k],k,dec):'–','font-style:italic;color:#5c6b6b')).join('')}</tr>`;
+ tb+=`<tr>${lab('Differenza','font-weight:700')}${cols.map(([,k,dec])=>{if(!d.base)return td('–');const df=d.cur[k]-d.base[k];if(Math.abs(df)<1e-9)return td('–');const pc=d.base[k]>0?df/d.base[k]*100:null,sg=df>0?'+':'';
+  return td(`<span style="color:#44585a;font-weight:600">${df>0?'▲':'▼'} ${sg}${itn(df,dec)}</span>${pc!=null?`<br><span style="font-size:10px;color:#7a8888">(${sg}${itn(pc,0)}%)</span>`:''}`)}).join('')}</tr>`;
+ const brand=logo?`<img src="${logo}" style="max-height:64px;max-width:230px;display:block" alt="">`:`<div style="font-size:22px;font-weight:700;color:${col}">${esc(coach||'Il tuo coach')}</div>`;
+ const sec=t=>`<div style="font-size:17px;font-weight:700;color:${col};margin:16px 0 4px">${t}</div>`;
+ return`<div class="rp" style="width:794px;height:1120px;position:relative;overflow:hidden;background:#fff;color:#1d2b2a;font-family:'Segoe UI',Arial,sans-serif;line-height:1.45;box-sizing:border-box"><div style="height:12px;background:${col}"></div><div style="padding:26px 42px 0">
+ <div style="display:flex;justify-content:space-between;align-items:center;min-height:68px">${brand}<div style="text-align:right"><div style="font-size:20px;font-weight:700">Report settimanale · dettaglio</div><div style="font-size:13px;color:#5c6b6b">dal ${fdl(d.a0)} al ${fdl(d.b0)}</div></div></div>
+ ${sec('HRV:FC delle ultime 5 settimane')}<div style="font-size:12px;color:#7a8888;margin:-2px 0 4px">La zona colorata è la settimana appena conclusa.</div>${c1}
+ ${sec('Sonno delle ultime 5 settimane')}${c2}
+ ${sec('Totali attività')}<table style="width:100%;border-collapse:collapse;table-layout:fixed"><colgroup><col style="width:${lw}px">${cols.map(()=>'<col>').join('')}</colgroup>${tb}</table>
+ <div style="font-size:11px;color:#7a8888;margin-top:6px">Ore e km sono quelli registrati su intervals.icu. Un "–" indica nessun dato o nessuna attività di quel tipo.</div></div>
+ <div style="position:absolute;left:42px;right:42px;bottom:26px;border-top:1px solid #e3e9e8;padding-top:10px;font-size:12px;color:#5c6b6b"><div style="display:flex;justify-content:space-between;align-items:flex-end"><div>${coach?`<div style="font-weight:600;color:#1d2b2a">${esc(coach)}</div>`:''}<div style="font-size:11px;max-width:430px">Le medie sono calcolate sui giorni con dato registrato. I dati sono indicativi e non sostituiscono un parere medico.</div></div><div style="font-size:14px;color:${col}"><b><i>${MOTTO}</i></b></div></div></div></div>`}
+function pdfFromJpegs(pgs){
+ const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+ const push=x=>{const b=typeof x==='string'?enc.encode(x):x;parts.push(b);len+=b.length};
+ const obj=(n,head,stream)=>{offs[n]=len;push(`${n} 0 obj\n${head}\n`);if(stream!==undefined){push('stream\n');push(stream);push('\nendstream\n')}push('endobj\n')};
+ const PW=595.28,PH=841.89,n=pgs.length;
+ push('%PDF-1.4\n');
+ obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,`<< /Type /Pages /Kids [${pgs.map((_,k)=>`${3+3*k} 0 R`).join(' ')}] /Count ${n} >>`);
+ pgs.forEach(({jpg,w,h},k)=>{const pg=3+3*k,im=pg+1,ct=pg+2,IH=PW*h/w,c=`q ${PW} 0 0 ${IH.toFixed(2)} 0 ${(PH-IH).toFixed(2)} cm /Im0 Do Q`;
+  obj(pg,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im0 ${im} 0 R >> >> /Contents ${ct} 0 R >>`);
+  obj(im,`<< /Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>`,jpg);
+  obj(ct,`<< /Length ${c.length} >>`,c)});
+ const N=3+3*n,x0=len;let t=`xref\n0 ${N}\n0000000000 65535 f \n`;for(let k=1;k<N;k++)t+=String(offs[k]).padStart(10,'0')+' 00000 n \n';
+ push(t+`trailer\n<< /Size ${N} /Root 1 0 R >>\nstartxref\n${x0}\n%%EOF\n`);
+ const out=new Uint8Array(len);let q=0;parts.forEach(b=>{out.set(b,q);q+=b.length});return new Blob([out],{type:'application/pdf'})}
+async function pageJpeg(el){const xhtml=new XMLSerializer().serializeToString(el);
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="794" height="1120"><foreignObject x="0" y="0" width="794" height="1120"><div xmlns="http://www.w3.org/1999/xhtml"><style>*{box-sizing:border-box}</style>${xhtml}</div></foreignObject></svg>`;
+ const img=new Image();img.width=794;img.height=1120;
+ await new Promise((ok,ko)=>{img.onload=ok;img.onerror=()=>ko(new Error('immagine del report non creata'));img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
+ const S=2,cv=document.createElement('canvas');cv.width=794*S;cv.height=1120*S;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.scale(S,S);g.drawImage(img,0,0,794,1120);
+ const jb=await new Promise((ok,ko)=>cv.toBlob(b=>b?ok(b):ko(new Error('conversione immagine non riuscita')),'image/jpeg',.92));
+ return{jpg:new Uint8Array(await jb.arrayBuffer()),w:cv.width,h:cv.height}}
+async function makePdf(r){const host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0';host.innerHTML=repHTML(r);document.body.appendChild(host);
+ try{const pgs=[];for(const el of [...host.children])pgs.push(await pageJpeg(el));return pdfFromJpegs(pgs)}
+ finally{host.remove()}}
+const b64Of=blob=>new Promise((ok,ko)=>{const f=new FileReader();f.onload=()=>ok(String(f.result).split(',')[1]);f.onerror=ko;f.readAsDataURL(blob)});
+const slug=n=>n.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_|_$/g,'');
+const repName=r=>`Report_${slug(r.name)}_${repWeek()[0]}.pdf`;
+
+// ======================= PAGINA ATLETA (prototipo) =======================
+let R=[];
+const AP={get(k,d=''){try{const v=localStorage.getItem('ap_'+k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem('ap_'+k,v)}catch(e){}}};
+const DOT={y:3,r:8};          // % di peggioramento per giallo / rosso
+const S={tab:'oggi',state:'init',r:null,ev:[],err:'',wx:null,sport:'all',chat:'coach',suspended:false,at:null};
+const TABS=[['oggi','🏠','Oggi'],['allen','🏃','Allenamenti'],['cal','📅','Calendario'],['report','📄','Report'],['chat','💬','Messaggi']];
+const SIGNS=[['Capricorno','♑',[12,22],[1,19]],['Acquario','♒',[1,20],[2,18]],['Pesci','♓',[2,19],[3,20]],['Ariete','♈',[3,21],[4,19]],['Toro','♉',[4,20],[5,20]],['Gemelli','♊',[5,21],[6,20]],['Cancro','♋',[6,21],[7,22]],['Leone','♌',[7,23],[8,22]],['Vergine','♍',[8,23],[9,22]],['Bilancia','♎',[9,23],[10,22]],['Scorpione','♏',[10,23],[11,21]],['Sagittario','♐',[11,22],[12,21]]];
+function signOf(b){if(!/^\d{4}-\d{2}-\d{2}$/.test(b||''))return null;const m=+b.slice(5,7),d=+b.slice(8,10);
+ return SIGNS.find(([,,a,z])=>a[0]<=z[0]?((m===a[0]&&d>=a[1])||(m===z[0]&&d<=z[1])||(m>a[0]&&m<z[0])):((m===a[0]&&d>=a[1])||(m===z[0]&&d<=z[1])||m>a[0]||m<z[0]))||null}
+const HA=['Oggi l\'energia è dalla tua parte:','La giornata chiede calma e metodo:','Una piccola abitudine di oggi pesa più di una grande promessa:','Il tuo corpo sa più di quanto pensi:','Costanza batte entusiasmo:','Una giornata ordinaria può diventare speciale:','Le stelle consigliano pazienza:','Qualcosa di buono è in arrivo:'];
+const HB=['ascolta le sensazioni prima di guardare i numeri','concediti una pausa vera tra un impegno e l\'altro','bevi con regolarità e mangia qualcosa di buono','muoviti un po\' anche fuori dall\'allenamento','non confrontarti con nessuno, solo con il te di ieri','scegli una cosa sola e falla bene','dedica dieci minuti a ciò che ti rilassa','sorridi alla prima fatica: è il segno che stai crescendo'];
+const HC=['Sera favorevole per riposare bene.','Un incontro inatteso porta buonumore.','Un\'idea nuova ti sorprenderà nel pomeriggio.','Giornata adatta a chiudere ciò che hai lasciato in sospeso.','Chi ti vuole bene ti darà una buona notizia.','La sera porta energia e buonumore.','Un ostacolo si rivelerà più piccolo del previsto.','Ottimo momento per ripartire con fiducia.'];
+const hashStr=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+function horoscope(sign,day){const h=hashStr(sign+'|'+day);return{txt:`${HA[h%8]} ${HB[(h>>>3)%8]}. ${HC[(h>>>6)%8]}`,num:1+(h>>>9)%90,col:['verde','azzurro','arancio','bianco','blu','giallo','rosso','viola'][(h>>>12)%8]}}
+const WMO={0:['☀️','Sereno'],1:['🌤️','Prevalentemente sereno'],2:['⛅','Parzialmente nuvoloso'],3:['☁️','Coperto'],45:['🌫️','Nebbia'],48:['🌫️','Nebbia con brina'],51:['🌦️','Pioviggine leggera'],53:['🌦️','Pioviggine'],55:['🌦️','Pioviggine intensa'],61:['🌧️','Pioggia leggera'],63:['🌧️','Pioggia'],65:['🌧️','Pioggia forte'],66:['🌧️','Pioggia gelata'],67:['🌧️','Pioggia gelata'],71:['🌨️','Neve leggera'],73:['🌨️','Neve'],75:['❄️','Neve forte'],77:['🌨️','Granelli di neve'],80:['🌦️','Rovesci'],81:['🌧️','Rovesci'],82:['⛈️','Rovesci forti'],85:['🌨️','Rovesci di neve'],86:['🌨️','Rovesci di neve'],95:['⛈️','Temporale'],96:['⛈️','Temporale con grandine'],99:['⛈️','Temporale con grandine']};
+const TYI={Run:'🏃',TrailRun:'🏃',VirtualRun:'🏃',Ride:'🚴',VirtualRide:'🚴',MountainBikeRide:'🚵',GravelRide:'🚴',EBikeRide:'🚴',Swim:'🏊',OpenWaterSwim:'🏊',WeightTraining:'🏋️',Walk:'🚶',Hike:'🥾',Rowing:'🚣',Yoga:'🧘',Workout:'💪'};
+const CAI={RACE_A:'🏁',RACE_B:'🏁',RACE_C:'🏁',NOTE:'📝',HOLIDAY:'🌴',SICK:'🤒',INJURED:'🩹',TARGET:'🎯'};
+const tyIcon=t=>TYI[t]||'🏅';
+const fdur=s=>{if(!s)return'';const m=Math.round(s/60);return m>=60?`${Math.floor(m/60)} h ${String(m%60).padStart(2,'0')}`:`${m} min`};
+const dayLbl=(d,today)=>d===today?'Oggi':d===addDays(today,1)?'Domani':new Date(d+'T12:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+const wa2html=t=>esc(t).replace(/\*_(.+?)_\*/g,'<b><i>$1</i></b>').replace(/\*(.+?)\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+const qOf=w=>w.some(y=>y.sleepScore!=null)?x=>x.sleepScore??null:x=>x.sleepQuality??null;
+function buildAthlete(w,ac,name,oldest,newest){
+ const rows=hrvSeries(w,oldest,newest),rowsR=hrvSeries(w,oldest,newest,ratioOf),ws=weekly(ac),h=hrvStatus(rows),hR=hrvStatus(rowsR),l=loadStatus(ws),dv=f=>vs4w(dailyVals(w,oldest,newest,f)),q=qOf(w);
+ return{name,w,ac,rows,rowsR,ws,h,hR,l,cv:cv7(rows),rhr:dv(x=>x.restingHR>0?x.restingHR:null),sl:dv(x=>x.sleepSecs>0?x.sleepSecs/3600:null),sq:dv(q),idle:idleDays(ac),hst:hR.state,adv:advice(hR.state,l.state)}}
+const MET=[{l:'HRV',u:'ms',dec:0,f:x=>x.hrv,good:1},{l:'HRV:FC',u:'',dec:2,f:ratioOf,good:1},{l:'FC a riposo',u:'bpm',dec:0,f:x=>x.restingHR>0?x.restingHR:null,good:-1},{l:'Sonno',u:'h',dec:1,f:x=>x.sleepSecs>0?x.sleepSecs/3600:null,good:1},{l:'Qualità sonno',u:'',dec:0,f:null,good:1}];
+function tiles(r,today){return MET.map(m=>{const f=m.f||qOf(r.w),mp=wMap(r.w,f);let dt=null;for(let i=0;i<=3;i++){const d=addDays(today,-i);if(mp[d]!=null){dt=d;break}}
+ if(!dt)return{m,none:1};const cur=mp[dt],prev=wAvg(mp,addDays(dt,-28),addDays(dt,-1),10),d=prev!=null?cur-prev:null,pc=d!=null&&prev?d/prev*100:null,worse=pc==null?0:(m.good>0?-pc:pc);
+ return{m,dt,cur,prev,d,pc,col:pc==null?'':worse>=DOT.r?'r':worse>=DOT.y?'y':'g'}})}
+async function weather(){const city=AP.get('city').trim();if(!city)return{need:1};
+ try{let c=null;try{c=JSON.parse(AP.get('geo','null'))}catch(e){}
+  if(!c||c.q!==city){const g=await(await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=it&format=json&name='+encodeURIComponent(city))).json();if(!g.results||!g.results[0])return{err:'Città non trovata'};c={q:city,lat:g.results[0].latitude,lon:g.results[0].longitude,n:g.results[0].name};AP.set('geo',JSON.stringify(c))}
+  const j=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=1`)).json();
+  return{n:c.n,t:j.current.temperature_2m,code:j.current.weather_code,wind:j.current.wind_speed_10m,tmax:j.daily.temperature_2m_max[0],tmin:j.daily.temperature_2m_min[0],rain:j.daily.precipitation_probability_max[0]}}
+ catch(e){return{err:'Meteo non disponibile'}}}
+const moodAll=()=>{try{return JSON.parse(AP.get('mood','{}'))}catch(e){return{}}};
+const MOODS=[['😫','0'],['😕','1'],['😐','2'],['🙂','3'],['😀','4'],['🤩','5']];
+// ------------------------------ viste
+function vOggi(){const r=S.r,today=iso(new Date()),mo=moodAll(),cur=mo[today];let h='';
+ // meteo
+ const w=S.wx;h+='<div class="card"><div class="ct">Meteo di oggi</div>';
+ if(!w)h+='<div class="mu sm">Carico il meteo…</div>';else if(w.need)h+='<div class="mu sm">Inserisci la tua città nelle impostazioni ⚙️ per vedere il meteo.</div>';else if(w.err)h+=`<div class="mu sm">${esc(w.err)}</div>`;
+ else{const [ic,tx]=WMO[w.code]||['🌡️','—'];h+=`<div class="wx"><div class="big">${ic}</div><div><div style="font-size:24px;font-weight:700">${itn(w.t,0)}°C <span class="sm mu" style="font-weight:500">${esc(w.n)}</span></div><div class="sm">${tx} · min ${itn(w.tmin,0)}° / max ${itn(w.tmax,0)}°</div><div class="xs mu">Pioggia ${w.rain??'–'}% · vento ${itn(w.wind,0)} km/h</div></div></div>`}
+ h+='</div>';
+ // come ti senti
+ h+=`<div class="card"><div class="ct">Come ti senti oggi?</div><div class="mood">${MOODS.map(([e,n])=>`<button data-mood="${n}" class="${cur===n?'on':''}" aria-label="${n} su 5"><span>${e}</span><b>${n}</b></button>`).join('')}</div><div class="xs mu" style="margin-top:8px">${cur!=null?'Grazie! Puoi cambiare la risposta fino a sera.':'0 = molto male · 5 = benissimo'}</div>${moodHist(mo,today)}</div>`;
+ // allenamento di oggi
+ const te=S.ev.filter(e=>(e.start_date_local||'').slice(0,10)===today);
+ h+='<div class="card"><div class="ct">Allenamento di oggi</div>'+(te.length?te.map(evHTML).join(''):'<div class="sm">Nessun allenamento in calendario: oggi è riposo o attività libera. 😌</div>')+'</div>';
+ // dati
+ const T=tiles(r,today);h+='<div class="card"><div class="ct">I tuoi dati <span class="pill">vs media 4 settimane</span></div><div class="tiles">'+T.map(t=>{
+  if(t.none)return`<div class="tile"><div class="tl">${t.m.l}<span class="dot"></span></div><div class="tv">–</div><div class="td">nessun dato recente</div></div>`;
+  const sg=t.d>0?'+':'';return`<div class="tile"><div class="tl">${t.m.l}<span class="dot ${t.col}" role="img" aria-label="${t.col==='g'?'in linea':t.col==='y'?'attenzione':'da curare'}"></span></div><div class="tv">${itn(t.cur,t.m.dec)} <small>${t.m.u}</small></div><div class="td">${t.d==null?'media non disponibile':`${t.d>0?'▲':t.d<0?'▼':'≈'} ${sg}${itn(t.d,t.m.dec)} (${sg}${itn(t.pc,0)}%) sulla media`}${t.dt!==today?` · dato del ${fD(t.dt)}`:''}</div></div>`}).join('')+'</div>'
+  +`<div class="leg"><span class="dot g"></span>in linea<span class="dot y"></span>attenzione<span class="dot r"></span>da curare</div></div>`;
+ // messaggio
+ const m=(()=>{const t=msgText(r,Math.floor(Math.random()*QUOTES.length));return t});
+ const txt=S.msg||(S.msg=m());
+ h+=`<div class="card"><div class="ct">Dal tuo coach</div><div class="msg">${txt?wa2html(txt):'Tutti i tuoi dati sono in linea con la tua media. Continua così! 💪'}</div></div>`;
+ // oroscopo
+ const sg=signOf(AP.get('birth'));h+='<div class="card"><div class="ct">Oroscopo del giorno <span class="xs" style="text-transform:none;letter-spacing:0">solo per svago</span></div>'+(sg?(()=>{const o=horoscope(sg[0],today);return`<div><b>${sg[1]} ${sg[0]}</b></div><div class="sm" style="margin-top:4px">${esc(o.txt)}</div><div class="xs mu" style="margin-top:6px">Numero fortunato: <b>${o.num}</b> · Colore: <b>${o.col}</b></div>`})():'<div class="mu sm">Inserisci la tua data di nascita nelle impostazioni ⚙️.</div>')+'</div>';
+ return h}
+function moodHist(mo,today){const ds=[];for(let i=6;i>=0;i--)ds.push(addDays(today,-i));if(!ds.some(d=>mo[d]!=null))return'';
+ return'<div class="xs mu" style="margin-top:10px">Ultimi 7 giorni: '+ds.map(d=>mo[d]!=null?MOODS[+mo[d]][0]:'·').join(' ')+'</div>'}
+function evHTML(e){const cat=e.category||'WORKOUT',ic=cat==='WORKOUT'?tyIcon(e.type):(CAI[cat]||'📌'),meta=[fdur(e.moving_time),e.icu_training_load?`carico ${Math.round(e.icu_training_load)}`:'',e.distance?itn(e.distance/1000,1)+' km':''].filter(Boolean).join(' · ');
+ return`<div class="ev"><div class="h"><div class="ic">${ic}</div><div style="flex:1"><div><b>${esc(e.name||'Allenamento')}</b></div><div class="xs mu">${esc(meta)}${cat!=='WORKOUT'?(meta?' · ':'')+esc(cat.replace('_',' ').toLowerCase()):''}</div>${e.description?`<details><summary>Dettagli</summary><pre>${esc(String(e.description).slice(0,900))}</pre></details>`:''}</div></div></div>`}
+function vAllen(){const r=S.r,today=iso(new Date()),mon=mondayOf(today),sw=sumAct(r.ac,mon,today),d=repData(r);
+ const K={all:[['Ore','ore',1],['Km','km',1],['Sedute','sedute',0],['Carico','carico',0]],run:[['Ore','oreRun',1],['Km','kmRun',1]],bike:[['Ore','oreBike',1],['Km','kmBike',1]],swim:[['Ore','oreSwim',1],['Km','kmSwim',2]]}[S.sport];
+ let h=`<div class="card"><div class="ct">Questa settimana (finora)</div><div class="tiles"><div class="tile"><div class="tl">Ore</div><div class="tv">${itn(sw.ore,1)}</div></div><div class="tile"><div class="tl">Km</div><div class="tv">${itn(sw.km,1)}</div></div><div class="tile"><div class="tl">Sedute</div><div class="tv">${sw.sedute}</div></div><div class="tile"><div class="tl">Carico</div><div class="tv">${itn(sw.carico,0)}</div></div></div></div>`;
+ const wk=[...d.weeks.map(w=>({l:fD(w.a),v:w.ore,ok:w.ok})),{l:fD(d.a0),v:d.cur.ore,ok:true,c:1}],mx=Math.max(...wk.map(x=>x.v),1);
+ h+=`<div class="card"><div class="ct">Ore per settimana</div><div class="bars">${wk.map(x=>`<div class="${x.c?'c':''}">${x.ok?itn(x.v,1):''}<i style="height:${Math.round(x.v/mx*58)}px"></i>${x.l}</div>`).join('')}</div></div>`;
+ h+=`<div class="card"><div class="ct">Totali attività</div><div class="chips">${[['all','Tutto'],['run','Corsa'],['bike','Bici'],['swim','Nuoto']].map(([k,l])=>`<button class="chip ${S.sport===k?'on':''}" data-sport="${k}">${l}</button>`).join('')}</div>`
+  +`<table><tr><th>Settimana</th>${K.map(([l])=>`<th>${l}</th>`).join('')}</tr>`+d.weeks.map(w=>`<tr><td>${fD(w.a)}–${fD(addDays(w.a,6))}</td>${K.map(([,k,dec])=>`<td>${w.ok?itn(w[k],dec):'–'}</td>`).join('')}</tr>`).join('')
+  +`<tr class="cur"><td>${fD(d.a0)}–${fD(d.b0)}</td>${K.map(([,k,dec])=>`<td>${itn(d.cur[k],dec)}</td>`).join('')}</tr><tr class="avg"><td>Media 4 sett.</td>${K.map(([,k,dec])=>`<td>${d.base?itn(d.base[k],dec):'–'}</td>`).join('')}</tr>`
+  +`<tr><td><b>Differenza</b></td>${K.map(([,k,dec])=>{if(!d.base)return'<td>–</td>';const x=d.cur[k]-d.base[k];if(Math.abs(x)<1e-9)return'<td>–</td>';const p=d.base[k]>0?x/d.base[k]*100:null,sg=x>0?'+':'';return`<td><b>${x>0?'▲':'▼'} ${sg}${itn(x,dec)}</b>${p!=null?`<br><span class="xs mu">${sg}${itn(p,0)}%</span>`:''}</td>`}).join('')}</tr></table></div>`;
+ const L=r.ac.slice().sort((a,b)=>(b.start_date_local||'').localeCompare(a.start_date_local||'')).slice(0,25);
+ h+=`<div class="ct" style="margin:18px 20px 0">Allenamenti fatti</div><div class="card">`+(L.length?L.map(a=>{const meta=[fdur(a.moving_time),a.distance?itn(a.distance/1000,1)+' km':'',a.icu_training_load?'carico '+Math.round(a.icu_training_load):'',a.average_heartrate?Math.round(a.average_heartrate)+' bpm':''].filter(Boolean).join(' · ');
+  return`<div class="ev"><div class="h"><div class="ic">${tyIcon(a.type)}</div><div style="flex:1"><div><b>${esc(a.name||a.type||'Attività')}</b></div><div class="xs mu">${new Date((a.start_date_local||'').slice(0,10)+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})} · ${esc(meta)}</div></div></div></div>`}).join(''):'<div class="mu sm">Nessun allenamento registrato.</div>')+'</div>';
+ return h}
+function vCal(){const today=iso(new Date()),by={};S.ev.forEach(e=>{const d=(e.start_date_local||'').slice(0,10);if(d>=today)(by[d]=by[d]||[]).push(e)});const ds=Object.keys(by).sort();
+ return ds.length?ds.map(d=>`<div class="day">${dayLbl(d,today)}</div><div class="card" style="margin-top:6px">${by[d].map(evHTML).join('')}</div>`).join(''):'<div class="card"><div class="sm">Nessun allenamento in calendario nei prossimi 14 giorni.</div></div>'}
+function vReport(){const [a,b]=repWeek();return`<div class="card"><div class="ct">Report settimanale</div><div class="sm">Settimana dal ${fdl(a)} al ${fdl(b)}, confrontata con le 4 precedenti.</div><p><button class="btn" id="dlpdf">Scarica il PDF</button> <span class="xs mu" id="dlmsg"></span></p></div><div style="margin:0 16px" id="rpv">${repHTML(S.r).split('<div class="rp"').filter(Boolean).map(p=>`<div class="rpbox"><div class="rpin"><div class="rp"${p}</div></div>`).join('')}</div>`}
+const chatGet=()=>{try{return JSON.parse(AP.get('chat','[]'))}catch(e){return[]}};
+function vChat(){let h=`<div class="card" style="padding:12px"><div class="chips" style="margin:0"><button class="chip ${S.chat==='coach'?'on':''}" data-chat="coach">Il tuo coach</button><button class="chip ${S.chat==='ai'?'on':''}" data-chat="ai">Assistente AI</button></div></div>`;
+ if(S.chat==='coach'){const m=chatGet();h+=`<div class="banner">Prova: in questa versione i messaggi restano solo su questo dispositivo. Nella versione finale arriveranno al coach.</div><div class="card"><div class="chat" id="chatbox">${m.length?m.map(x=>`<div class="b ${x.me?'me':'co'}">${esc(x.t)}</div>`).join(''):'<div class="mu sm">Scrivi qui un messaggio privato al tuo coach.</div>'}</div><form class="inp" id="chatf"><input id="chati" placeholder="Scrivi un messaggio…" autocomplete="off"><button class="btn" type="submit">Invia</button></form></div>`}
+ else{const m=S.ai||[];h+=`<div class="banner">Prova: l'assistente non è ancora collegato. Nella versione finale risponderà a domande su sport, alimentazione e allenamento (senza sostituire il parere del medico).</div><div class="card"><div class="chips">${['Cosa mangiare prima di un allenamento lungo?','Come recupero meglio dopo una gara?','Quanto devo bere in allenamento?'].map(q=>`<button class="chip" data-aiq="${esc(q)}">${esc(q)}</button>`).join('')}</div><div class="chat" id="chatbox">${m.map(x=>`<div class="b ${x.me?'me':'co'}">${esc(x.t)}</div>`).join('')}</div><form class="inp" id="aif"><input id="aii" placeholder="Fai una domanda…" autocomplete="off"><button class="btn" type="submit">Invia</button></form></div>`}
+ return h}
+// ------------------------------ rendering
+function render(){const v=$('view'),today=new Date();$('dt').textContent=today.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+ $('hi').textContent='Ciao'+(AP.get('name')?' '+AP.get('name').split(' ')[0]:'')+' 👋';
+ $('tabs').innerHTML=TABS.map(([k,i,l])=>`<button data-tab="${k}" class="${S.tab===k?'on':''}"><span>${i}</span>${l}</button>`).join('');
+ let bn='';
+ if(S.suspended){v.innerHTML='<div class="card center"><div class="big">⏸️</div><h2>Servizio sospeso</h2><p class="mu">Il tuo accesso è al momento sospeso. Per riattivarlo contatta il tuo coach.</p></div>';$('banner').innerHTML='';return}
+ if(S.state==='setup'){v.innerHTML='<div class="card center"><div class="big">⚙️</div><h2>Configura la tua area</h2><p class="mu">Inserisci ID e chiave di intervals.icu (solo per la prova) nelle impostazioni.</p><button class="btn" id="open-set">Apri impostazioni</button></div>';$('banner').innerHTML='';return}
+ if(S.state==='loading'){v.innerHTML='<div class="card center"><div class="big">⏳</div><p class="mu">Carico i tuoi dati…</p></div>';return}
+ if(S.state==='err'){v.innerHTML=`<div class="card center"><div class="big">⚠️</div><p>${esc(S.err)}</p><button class="btn" id="retry">Riprova</button></div>`;return}
+ if(AP.get('simsus')==='1')bn='<div class="banner">Prova: stai simulando un servizio sospeso.</div>';
+ $('banner').innerHTML=bn+`<div class="xs mu" style="margin:0 20px">${S.at?'Aggiornato alle '+S.at:''}</div>`;
+ v.innerHTML={oggi:vOggi,allen:vAllen,cal:vCal,report:vReport,chat:vChat}[S.tab]();
+ if(S.tab==='report')fitReport();
+ const cb=$('chatbox');if(cb)cb.scrollTop=cb.scrollHeight}
+function fitReport(){document.querySelectorAll('.rpbox').forEach(b=>{const s=b.clientWidth/794;b.firstElementChild.style.transform=`scale(${s})`;b.style.height=(1120*s)+'px'})}
+window.addEventListener('resize',()=>{if(S.tab==='report')fitReport()});
+async function gate(){let sus=AP.get('simsus')==='1';const t=new URLSearchParams(location.search).get('t');
+ if(t&&!sus){try{const j=await(await fetch('accessi.json',{cache:'no-store'})).json(),a=j.tokens&&j.tokens[t];if(a&&a.attivo===false)sus=true}catch(e){}}
+ return sus}
+async function load(){S.suspended=await gate();if(S.suspended){render();return}
+ const key=AP.get('key').trim(),id=AP.get('id').trim();if(!key||!id){S.state='setup';render();return}
+ S.state='loading';render();const newest=iso(new Date()),oldest=addDays(newest,-120);
+ try{const [w,ac,ev]=await Promise.all([api(id,'wellness',key,{oldest,newest}),api(id,'activities',key,{oldest,newest}),api(id,'events',key,{oldest:newest,newest:addDays(newest,14)})]);
+  S.r=buildAthlete(w,ac,AP.get('name')||'Atleta',oldest,newest);S.ev=(ev||[]).slice().sort((a,b)=>(a.start_date_local||'').localeCompare(b.start_date_local||''));S.msg=null;S.state='ok';S.at=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
+ catch(e){S.state='err';S.err=e instanceof TypeError?'Connessione non riuscita: controlla la rete (o la restrizione del browser).':e.message}
+ render();if(S.state==='ok'){S.wx=null;weather().then(w=>{S.wx=w;if(S.tab==='oggi')render()})}}
+function openSheet(){RC.get('coach');$('sin').innerHTML=`<h2 style="margin-top:0">Impostazioni (prova)</h2>
+ <label>Il tuo nome</label><input id="s-name" value="${esc(AP.get('name'))}">
+ <label>ID atleta intervals.icu (es. i12345)</label><input id="s-id" value="${esc(AP.get('id'))}">
+ <label>Chiave API intervals.icu <span class="xs">(solo per la prova: nella versione finale non è nella pagina)</span></label><input id="s-key" type="password" value="${esc(AP.get('key'))}" autocomplete="off">
+ <label>Città (per il meteo)</label><input id="s-city" value="${esc(AP.get('city'))}">
+ <label>Data di nascita (per l'oroscopo)</label><input id="s-birth" type="date" value="${esc(AP.get('birth'))}">
+ <label>Nome del coach (nel report)</label><input id="s-coach" value="${esc(RC.get('coach'))}">
+ <label>Colore del report</label><input id="s-col" type="color" value="${RC.get('color','#0f6e68')}" style="height:42px;padding:2px">
+ <label class="row"><input id="s-sus" type="checkbox" ${AP.get('simsus')==='1'?'checked':''}> Simula «servizio sospeso» (solo prova)</label>
+ <p style="display:flex;gap:8px;margin-top:20px"><button class="btn" id="s-save">Salva e aggiorna</button><button class="btn sec" id="s-close">Chiudi</button></p>`;
+ $('sheet').classList.add('on');$('s-close').onclick=()=>$('sheet').classList.remove('on');
+ $('s-save').onclick=()=>{AP.set('name',$('s-name').value);AP.set('id',$('s-id').value);AP.set('key',$('s-key').value);AP.set('city',$('s-city').value);AP.set('birth',$('s-birth').value);AP.set('simsus',$('s-sus').checked?'1':'0');RC.set('coach',$('s-coach').value);RC.set('color',$('s-col').value);$('sheet').classList.remove('on');load()}}
+document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.id==='gear'||t.id==='open-set')return openSheet();if(t.id==='retry')return load();
+ if(t.dataset.tab){S.tab=t.dataset.tab;render();window.scrollTo(0,0);return}
+ if(t.dataset.mood!=null){const mo=moodAll();mo[iso(new Date())]=t.dataset.mood;AP.set('mood',JSON.stringify(mo));render();return}
+ if(t.dataset.sport){S.sport=t.dataset.sport;render();return}
+ if(t.dataset.chat){S.chat=t.dataset.chat;render();return}
+ if(t.dataset.aiq){S.ai=(S.ai||[]);S.ai.push({me:1,t:t.dataset.aiq},{t:'(Prova) Qui risponderà l\'assistente AI, quando sarà collegato.'});render();return}
+ if(t.id==='dlpdf'){$('dlmsg').textContent='Creo il PDF…';try{const b=await makePdf(S.r),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=repName(S.r);a.click();$('dlmsg').textContent='PDF scaricato.'}catch(x){$('dlmsg').textContent='Errore: '+x.message}}});
+document.addEventListener('submit',e=>{e.preventDefault();
+ if(e.target.id==='chatf'){const i=$('chati'),t=i.value.trim();if(!t)return;const m=chatGet();m.push({me:1,t});AP.set('chat',JSON.stringify(m));render()}
+ if(e.target.id==='aif'){const i=$('aii'),t=i.value.trim();if(!t)return;S.ai=(S.ai||[]);S.ai.push({me:1,t},{t:'(Prova) Qui risponderà l\'assistente AI, quando sarà collegato.'});render()}});
+load();
+</script></body></html>
