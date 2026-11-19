@@ -371,6 +371,17 @@ const b64Of=blob=>new Promise((ok,ko)=>{const f=new FileReader();f.onload=()=>ok
 const slug=n=>n.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_|_$/g,'');
 const repName=r=>`Report_${slug(r.name)}_${repWeek()[0]}.pdf`;
 
+// ---- servizio online (Firebase Firestore via REST, senza librerie)
+const FB={key:'AIzaSyCAGq9W_p_qJGzXZvyGsUfMjYdbWK-SPas',pid:'coach-atleti'};
+const FSB='https://firestore.googleapis.com/v1/projects/'+FB.pid+'/databases/(default)/documents';
+const fsEnc=o=>{const f={};for(const k in o){const v=o[k];if(v==null)continue;f[k]=typeof v==='number'?(Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v}):typeof v==='boolean'?{booleanValue:v}:{stringValue:String(v)}}return{fields:f}};
+const fsDec=d=>{const o={id:(d.name||'').split('/').pop()},f=d.fields||{};for(const k in f){const v=f[k];o[k]='stringValue'in v?v.stringValue:'integerValue'in v?+v.integerValue:'doubleValue'in v?v.doubleValue:'booleanValue'in v?v.booleanValue:null}return o};
+async function fsCall(method,path,body,bearer,qs){const h={};if(body)h['Content-Type']='application/json';if(bearer)h.Authorization='Bearer '+bearer;
+ const r=await fetch(FSB+path+'?key='+FB.key+(qs?'&'+qs:''),{method,headers:h,body:body?JSON.stringify(body):undefined});
+ if(r.status===404)return null;const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(r.status===403?'Accesso non consentito dalle regole del database (403)':r.status===401?'Accesso scaduto: rifai il login (401)':(j.error&&j.error.message)||('Errore '+r.status));return j}
+async function fsList(col,bearer){const out=[];let pt='';for(let i=0;i<10;i++){const j=await fsCall('GET',col,null,bearer,'pageSize=300'+(pt?'&pageToken='+encodeURIComponent(pt):''));if(!j)return out;(j.documents||[]).forEach(d=>out.push(fsDec(d)));if(!j.nextPageToken)break;pt=j.nextPageToken}return out}
+
 // ======================= PAGINA ATLETA (prototipo) =======================
 const INGR={"albume": [48, 0.7, 11, 0.2], "arancia": [45, 10, 1, 0.2], "avena": [372, 60, 13, 7], "banana": [90, 21, 1, 0.2], "bresaola": [150, 0, 32, 2], "ceci": [115, 16, 7, 2.5], "couscous": [360, 72, 12.5, 1.5], "fagioli": [90, 12, 7, 0.5], "farro": [335, 67, 15, 2.5], "fette": [410, 76, 11, 6], "fiocchi": [75, 3.5, 12, 1.5], "frutti": [45, 8, 1, 0.4], "gallette": [385, 82, 8, 2.8], "gamberi": [70, 0, 15, 1], "kiwi": [50, 10, 1, 0.5], "latte": [34, 5, 3.5, 0.2], "lenticchie": [330, 52, 24, 1.5], "marmellata": [250, 62, 0.5, 0], "mela": [52, 12, 0.3, 0.2], "merluzzo": [72, 0, 17, 0.6], "miele": [304, 80, 0.3, 0], "olio": [900, 0, 0, 100], "pane": [270, 58, 9, 0.8], "passata": [30, 5, 1.5, 0.2], "pasta": [350, 72, 12, 1.5], "patate": [80, 18, 2, 0.1], "pollo": [100, 0, 22.5, 1], "pomodori": [20, 3.5, 1, 0.2], "riso": [355, 80, 7, 0.6], "tacchino": [105, 0, 23.5, 1.2], "tonno": [105, 0, 24, 1], "verdure": [25, 4, 1.5, 0.3], "yogurt": [55, 4, 10, 0.2]};
 const INAME={"albume": "albume", "arancia": "arancia", "avena": "fiocchi d'avena", "banana": "banana", "bresaola": "bresaola", "ceci": "ceci in scatola (scolati)", "couscous": "couscous", "fagioli": "fagioli cannellini (scolati)", "farro": "farro o orzo", "fette": "fette biscottate", "fiocchi": "fiocchi di latte magri", "frutti": "frutti di bosco", "gallette": "gallette di riso", "gamberi": "gamberi", "kiwi": "kiwi", "latte": "latte scremato", "lenticchie": "lenticchie secche", "marmellata": "marmellata", "mela": "mela", "merluzzo": "merluzzo", "miele": "miele", "olio": "olio extravergine d'oliva", "pane": "pane", "passata": "passata di pomodoro", "pasta": "pasta", "patate": "patate", "pollo": "petto di pollo", "pomodori": "pomodorini", "riso": "riso", "tacchino": "petto di tacchino", "tonno": "tonno al naturale (scolato)", "verdure": "verdure di stagione", "yogurt": "yogurt greco magro"};
@@ -479,19 +490,26 @@ const ART_DEMO=[
  {id:'demo3',tipo:'link',titolo:'Attività fisica: la scheda informativa dell\'OMS',fonte:'Organizzazione Mondiale della Sanità',url:'https://www.who.int/news-room/fact-sheets/detail/physical-activity',nota:'Link di esempio: le raccomandazioni generali sull\'attività fisica.',esempio:1}];
 const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'#';
 const qaAll=()=>{try{return JSON.parse(AP.get('qa','{}'))}catch(e){return{}}};
+const TOK=(new URLSearchParams(location.search).get('t')||'').replace(/[^a-z0-9]/gi,'')||AP.get('tok');if(TOK)AP.set('tok',TOK);
+async function syncOn(){if(!TOK)return;try{S.on=(await fsList('/atleti/'+TOK+'/messaggi')).sort((a,b)=>(a.ts||0)-(b.ts||0));S.onerr=''}catch(e){S.onerr=e instanceof TypeError?'Connessione non riuscita.':e.message}}
+async function sendOn(o){await fsCall('POST','/atleti/'+TOK+'/messaggi',fsEnc(Object.assign({},o,{da:'atl',ts:Date.now()})))}
+const coachMsgs=()=>(S.on||[]).filter(x=>x.tipo==='msg');
+const unreadN=()=>{const s=+AP.get('chatseen','0');return coachMsgs().filter(x=>x.da==='coach'&&x.ts>s).length};
+function qaFor(id){if(!TOK)return qaAll()[id]||[];const on=S.on||[];return on.filter(x=>x.tipo==='domanda'&&x.art===id).map(q=>{const r=on.find(x=>x.tipo==='risposta'&&x.rif===q.id);return{t:q.t,d:q.giorno,r:r?r.t:''}})}
+
 const arts=()=>S.arts||ART_DEMO;
 function vArt(){const A=arts();
- if(S.artOpen){const a=A.find(x=>x.id===S.artOpen);if(a){const qa=(qaAll()[a.id]||[]);
+ if(S.artOpen){const a=A.find(x=>x.id===S.artOpen);if(a){const qa=qaFor(a.id);
   return`<p><button class="back" id="artback">‹ Tutti gli articoli</button></p><div class="card"><div><span class="tag">${a.tipo==='link'?'Link':'Articolo'}</span>${a.esempio?'<span class="tag" style="background:#fff4d6;color:#6b4e00">esempio</span>':''}</div><h2 style="margin:8px 0 2px;font-size:20px">${esc(a.titolo)}</h2><div class="xs mu">${esc(a.autore||a.fonte||'')}${a.data?' · '+fdl(a.data):''}</div>`+
    (a.tipo==='link'?`<p class="sm">${esc(a.nota||'')}</p><p><a class="btn" style="text-decoration:none;display:inline-block" href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener">Apri l'articolo ↗</a></p>`:(a.corpo||[]).map(p=>`<p>${esc(p)}</p>`).join(''))+`</div>
    <div class="card"><div class="ct">Domande e risposte</div>${qa.length?qa.map(q=>`<div class="qa"><div class="w">Tu · ${fdl(q.d)}</div>${esc(q.t)}${q.r?`<div class="w" style="margin-top:8px">Il coach</div>${esc(q.r)}`:'<div class="w" style="margin-top:6px">⏳ In attesa di risposta</div>'}</div>`).join(''):'<div class="mu sm">Nessuna domanda: scrivi la prima.</div>'}
-   <div class="banner" style="margin:10px 0 0">Prova: le domande restano su questo dispositivo. Nella versione finale arrivano al coach, che risponde qui sotto.</div>
+   ${TOK?(S.onerr?`<div class="banner" style="margin:10px 0 0">⚠️ ${esc(S.onerr)}</div>`:''):'<div class="banner" style="margin:10px 0 0">Senza codice personale le domande restano su questo dispositivo.</div>'}
    <form class="inp" id="qaf" style="margin-top:10px"><input id="qai" placeholder="Fai una domanda su questo articolo…" autocomplete="off"><button class="btn" type="submit">Invia</button></form></div>`}}
- return`<div class="ct" style="margin:14px 20px 0">Articoli e approfondimenti</div><div class="card">`+(A.length?A.map(a=>`<div class="art tap" data-art="${esc(a.id)}" role="button" tabindex="0"><div><span class="tag">${a.tipo==='link'?'Link':'Articolo'}</span>${a.esempio?'<span class="tag" style="background:#fff4d6;color:#6b4e00">esempio</span>':''}</div><div style="font-weight:700;margin-top:4px">${esc(a.titolo)}</div><div class="xs mu">${esc(a.autore||a.fonte||'')}${a.data?' · '+fdl(a.data):''}${(qaAll()[a.id]||[]).length?' · 💬 '+qaAll()[a.id].length:''}</div></div>`).join(''):'<div class="mu sm">Nessun articolo.</div>')+`</div><div class="xs mu" style="margin:0 20px">Gli articoli li sceglie e li scrive il tuo coach. Puoi fare domande su ciascuno.</div>`}
+ return`<div class="ct" style="margin:14px 20px 0">Articoli e approfondimenti</div><div class="card">`+(A.length?A.map(a=>`<div class="art tap" data-art="${esc(a.id)}" role="button" tabindex="0"><div><span class="tag">${a.tipo==='link'?'Link':'Articolo'}</span>${a.esempio?'<span class="tag" style="background:#fff4d6;color:#6b4e00">esempio</span>':''}</div><div style="font-weight:700;margin-top:4px">${esc(a.titolo)}</div><div class="xs mu">${esc(a.autore||a.fonte||'')}${a.data?' · '+fdl(a.data):''}${qaFor(a.id).length?' · 💬 '+qaFor(a.id).length:''}</div></div>`).join(''):'<div class="mu sm">Nessun articolo.</div>')+`</div><div class="xs mu" style="margin:0 20px">Gli articoli li sceglie e li scrive il tuo coach. Puoi fare domande su ciascuno.</div>`}
 async function loadArticles(){try{const j=await(await fetch('articoli.json',{cache:'no-store'})).json();if(Array.isArray(j)&&j.length){S.arts=j;if(S.tab==='art')render()}}catch(e){}}
 const chatGet=()=>{try{return JSON.parse(AP.get('chat','[]'))}catch(e){return[]}};
 function vChat(){let h=`<div class="card" style="padding:12px"><div class="chips" style="margin:0"><button class="chip ${S.chat==='coach'?'on':''}" data-chat="coach">Il tuo coach</button><button class="chip ${S.chat==='ai'?'on':''}" data-chat="ai">Assistente AI</button></div></div>`;
- if(S.chat==='coach'){const m=chatGet();h+=`<div class="banner">Prova: in questa versione i messaggi restano solo su questo dispositivo. Nella versione finale arriveranno al coach.</div><div class="card"><div class="chat" id="chatbox">${m.length?m.map(x=>`<div class="b ${x.me?'me':'co'}">${esc(x.t)}</div>`).join(''):'<div class="mu sm">Scrivi qui un messaggio privato al tuo coach.</div>'}</div><form class="inp" id="chatf"><input id="chati" placeholder="Scrivi un messaggio…" autocomplete="off"><button class="btn" type="submit">Invia</button></form></div>`}
+ if(S.chat==='coach'){const m=TOK?coachMsgs().map(x=>({me:x.da==='atl',t:x.t})):chatGet();if(TOK)AP.set('chatseen',String(Date.now()));h+=`<div class="banner">${TOK?(S.onerr?'⚠️ '+esc(S.onerr):'I messaggi sono privati: li vedi solo tu e il tuo coach.'):'Senza codice personale i messaggi restano solo su questo dispositivo.'}</div><div class="card"><div class="chat" id="chatbox">${m.length?m.map(x=>`<div class="b ${x.me?'me':'co'}">${esc(x.t)}</div>`).join(''):'<div class="mu sm">Scrivi qui un messaggio privato al tuo coach.</div>'}</div><form class="inp" id="chatf"><input id="chati" placeholder="Scrivi un messaggio…" autocomplete="off"><button class="btn" type="submit">Invia</button></form></div>`}
  else{const m=S.ai||[];h+=`<div class="banner">Prova: l'assistente non è ancora collegato. Nella versione finale risponderà a domande su sport, alimentazione e allenamento (senza sostituire il parere del medico).</div><div class="card"><div class="chips">${['Cosa mangiare prima di un allenamento lungo?','Come recupero meglio dopo una gara?','Quanto devo bere in allenamento?'].map(q=>`<button class="chip" data-aiq="${esc(q)}">${esc(q)}</button>`).join('')}</div><div class="chat" id="chatbox">${m.map(x=>`<div class="b ${x.me?'me':'co'}">${esc(x.t)}</div>`).join('')}</div><form class="inp" id="aif"><input id="aii" placeholder="Fai una domanda…" autocomplete="off"><button class="btn" type="submit">Invia</button></form></div>`}
  return h}
 // ------------------------------ dettaglio allenamento
@@ -526,7 +544,7 @@ async function openAct(id){const a=S.r&&S.r.ac.find(x=>String(x.id)===String(id)
 // ------------------------------ rendering
 function render(){const v=$('view'),today=new Date();$('dt').textContent=today.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
  $('hi').textContent='Ciao'+(AP.get('name')?' '+AP.get('name').split(' ')[0]:'')+' 👋';
- $('tabs').innerHTML=TABS.map(([k,i,l])=>`<button data-tab="${k}" class="${S.tab===k?'on':''}"><span>${i}</span>${l}</button>`).join('');
+ $('tabs').innerHTML=TABS.map(([k,i,l])=>`<button data-tab="${k}" class="${S.tab===k?'on':''}"><span>${i}</span>${l}${k==='chat'&&TOK&&S.tab!=='chat'&&unreadN()?' <b style="color:#d33">●</b>':''}</button>`).join('');
  let bn='';
  if(S.suspended){v.innerHTML='<div class="card center"><div class="big">⏸️</div><h2>Servizio sospeso</h2><p class="mu">Il tuo accesso è al momento sospeso. Per riattivarlo contatta il tuo coach.</p></div>';$('banner').innerHTML='';return}
  if(S.state==='setup'){v.innerHTML='<div class="card center"><div class="big">⚙️</div><h2>Configura la tua area</h2><p class="mu">Inserisci ID e chiave di intervals.icu (solo per la prova) nelle impostazioni.</p><button class="btn" id="open-set">Apri impostazioni</button></div>';$('banner').innerHTML='';return}
@@ -541,8 +559,10 @@ function fitReport(){document.querySelectorAll('.rpbox').forEach(b=>{const s=b.c
 window.addEventListener('resize',()=>{if(S.tab==='report')fitReport()});
 async function gate(){let sus=AP.get('simsus')==='1';const t=new URLSearchParams(location.search).get('t');
  if(t&&!sus){try{const j=await(await fetch('accessi.json',{cache:'no-store'})).json(),a=j.tokens&&j.tokens[t];if(a&&a.attivo===false)sus=true}catch(e){}}
+ if(t&&TOK&&!sus){try{const s=await fsCall('GET','/atleti/'+TOK);if(s&&s.fields&&s.fields.attivo&&s.fields.attivo.booleanValue===false)sus=true}catch(e){}}
  return sus}
 async function load(){S.suspended=await gate();if(S.suspended){render();return}
+ await syncOn();
  const key=AP.get('key').trim(),id=AP.get('id').trim();if(!key||!id){S.state='setup';render();return}
  S.state='loading';render();const newest=iso(new Date()),oldest=addDays(newest,-120);
  try{const [w,ac,ev]=await Promise.all([api(id,'wellness',key,{oldest,newest}),api(id,'activities',key,{oldest,newest}),api(id,'events',key,{oldest:newest,newest:addDays(newest,14)})]);
@@ -553,6 +573,7 @@ function openSheet(){RC.get('coach');$('sin').innerHTML=`<h2 style="margin-top:0
  <label>Il tuo nome</label><input id="s-name" value="${esc(AP.get('name'))}">
  <label>ID atleta intervals.icu (es. i12345)</label><input id="s-id" value="${esc(AP.get('id'))}">
  <label>Chiave API intervals.icu <span class="xs">(solo per la prova: nella versione finale non è nella pagina)</span></label><input id="s-key" type="password" value="${esc(AP.get('key'))}" autocomplete="off">
+ <label>Codice personale (te lo dà il coach)</label><input id="s-tok" value="${esc(AP.get('tok'))}" autocomplete="off" autocapitalize="off">
  <label>Città (per il meteo)</label><input id="s-city" value="${esc(AP.get('city'))}">
  <label>Data di nascita (per l'oroscopo)</label><input id="s-birth" type="date" value="${esc(AP.get('birth'))}">
  <label>Nome del coach (nel report)</label><input id="s-coach" value="${esc(RC.get('coach'))}">
@@ -562,18 +583,19 @@ function openSheet(){RC.get('coach');$('sin').innerHTML=`<h2 style="margin-top:0
  <details class="dd"><summary>Dati dell'allenamento da mostrare</summary>${VIS.map(([k,l])=>`<label class="row"><input type="checkbox" class="s-vis" data-k="${k}" ${visGet().has(k)?'checked':''}> ${l}</label>`).join('')}</details>
  <p style="display:flex;gap:8px;margin-top:20px"><button class="btn" id="s-save">Salva e aggiorna</button><button class="btn sec" id="s-close">Chiudi</button></p>`;
  $('sheet').classList.add('on');$('s-close').onclick=()=>$('sheet').classList.remove('on');
- $('s-save').onclick=()=>{AP.set('name',$('s-name').value);AP.set('id',$('s-id').value);AP.set('key',$('s-key').value);AP.set('city',$('s-city').value);AP.set('birth',$('s-birth').value);AP.set('simsus',$('s-sus').checked?'1':'0');AP.set('push',$('s-push').checked?'1':'0');AP.set('vis',JSON.stringify([...document.querySelectorAll('.s-vis')].filter(c=>c.checked).map(c=>c.dataset.k)));RC.set('coach',$('s-coach').value);RC.set('color',$('s-col').value);$('sheet').classList.remove('on');load()}}
+ $('s-save').onclick=()=>{AP.set('name',$('s-name').value);AP.set('id',$('s-id').value);AP.set('key',$('s-key').value);AP.set('city',$('s-city').value);AP.set('tok',$('s-tok').value.trim().replace(/[^a-z0-9]/gi,''));AP.set('birth',$('s-birth').value);AP.set('simsus',$('s-sus').checked?'1':'0');AP.set('push',$('s-push').checked?'1':'0');AP.set('vis',JSON.stringify([...document.querySelectorAll('.s-vis')].filter(c=>c.checked).map(c=>c.dataset.k)));RC.set('coach',$('s-coach').value);RC.set('color',$('s-col').value);$('sheet').classList.remove('on');load()}}
 document.addEventListener('click',async e=>{const ac=e.target.closest('[data-act]');if(ac&&!e.target.closest('button'))return openAct(ac.dataset.act);const ar=e.target.closest('[data-art]');if(ar&&!e.target.closest('button')){S.artOpen=ar.dataset.art;render();window.scrollTo(0,0);return}const t=e.target.closest('button');if(!t)return;if(t.id==='artback'){S.artOpen=null;render();return}
  if(t.id==='gear'||t.id==='open-set')return openSheet();if(t.id==='retry')return load();
  if(t.dataset.tab){S.tab=t.dataset.tab;render();window.scrollTo(0,0);return}
- if(t.dataset.mood!=null){const n=t.dataset.mood,mo=moodAll();mo[iso(new Date())]=n;AP.set('mood',JSON.stringify(mo));S.mm={st:'saving'};render();const r=await pushMood(+n);S.mm=r.skip?null:r.ok?{st:'ok',v:MOOD2ICU[n]}:{st:'err',m:r.err};render();return}
+ if(t.dataset.mood!=null){const n=t.dataset.mood,mo=moodAll();mo[iso(new Date())]=n;AP.set('mood',JSON.stringify(mo));S.mm={st:'saving'};render();if(TOK)sendOn({tipo:'umore',voto:+n,giorno:iso(new Date())}).catch(()=>{});const r=await pushMood(+n);S.mm=r.skip?null:r.ok?{st:'ok',v:MOOD2ICU[n]}:{st:'err',m:r.err};render();return}
  if(t.dataset.sport){S.sport=t.dataset.sport;render();return}
  if(t.dataset.chat){S.chat=t.dataset.chat;render();return}
  if(t.dataset.aiq){S.ai=(S.ai||[]);S.ai.push({me:1,t:t.dataset.aiq},{t:'(Prova) Qui risponderà l\'assistente AI, quando sarà collegato.'});render();return}
  if(t.id==='dlpdf'){$('dlmsg').textContent='Creo il PDF…';try{const b=await makePdf(S.r),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=repName(S.r);a.click();$('dlmsg').textContent='PDF scaricato.'}catch(x){$('dlmsg').textContent='Errore: '+x.message}}});
 document.addEventListener('submit',e=>{e.preventDefault();
- if(e.target.id==='chatf'){const i=$('chati'),t=i.value.trim();if(!t)return;const m=chatGet();m.push({me:1,t});AP.set('chat',JSON.stringify(m));render()}
- if(e.target.id==='qaf'){const i=$('qai'),x=i.value.trim();if(!x||!S.artOpen)return;const q=qaAll();(q[S.artOpen]=q[S.artOpen]||[]).push({t:x,d:iso(new Date())});AP.set('qa',JSON.stringify(q));render()}
+ if(e.target.id==='chatf'){const i=$('chati'),t=i.value.trim();if(!t)return;if(TOK){i.value='';sendOn({tipo:'msg',t}).then(syncOn).then(render).catch(x=>{S.onerr='Messaggio NON inviato: '+x.message;i.value=t;render()});return}const m=chatGet();m.push({me:1,t});AP.set('chat',JSON.stringify(m));render()}
+ if(e.target.id==='qaf'){const i=$('qai'),x=i.value.trim();if(!x||!S.artOpen)return;if(TOK){i.value='';sendOn({tipo:'domanda',t:x,art:S.artOpen,giorno:iso(new Date())}).then(syncOn).then(render).catch(z=>{S.onerr='Domanda NON inviata: '+z.message;render()});return}const q=qaAll();(q[S.artOpen]=q[S.artOpen]||[]).push({t:x,d:iso(new Date())});AP.set('qa',JSON.stringify(q));render()}
  if(e.target.id==='aif'){const i=$('aii'),t=i.value.trim();if(!t)return;S.ai=(S.ai||[]);S.ai.push({me:1,t},{t:'(Prova) Qui risponderà l\'assistente AI, quando sarà collegato.'});render()}});
 loadArticles();load();
+setInterval(async()=>{if(!TOK||S.suspended||document.hidden)return;const n=(S.on||[]).length;await syncOn();const a=document.activeElement;if((S.on||[]).length!==n&&!(a&&a.tagName==='INPUT')&&S.state!=='loading')render()},30000);
 </script></body></html>
